@@ -3,7 +3,9 @@ import React, { useEffect, useMemo, useState } from "react";
 import {
   FlatList,
   KeyboardAvoidingView,
+  LayoutAnimation,
   Platform,
+  Pressable,
   StyleSheet,
   Text,
   TextInput,
@@ -24,6 +26,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   bubble: {
+    flexDirection: "row",
     backgroundColor: "lime",
     borderRadius: 8,
     paddingVertical: 8,
@@ -50,7 +53,7 @@ const styles = StyleSheet.create({
     maxHeight: 120,
     padding: 8,
     fontSize: 16,
-    color: "white",
+    color: "black",
   },
   sendBtn: { paddingHorizontal: 10, paddingVertical: 8 },
   sendIcon: { fontSize: 18, fontWeight: "bold", color: "#007AFF" },
@@ -73,9 +76,30 @@ const styles = StyleSheet.create({
   searchIcon: {
     marginLeft: 8,
   },
+  themeIcon: {
+    marginRight: 8,
+  },
+  selectedWrapper: {
+    backgroundColor: "#e0f2ff",
+  },
+  actionBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    backgroundColor: "#2196f3",
+  },
+  actionCount: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  actionBtn: {
+    padding: 4,
+  },
 });
 
-// Helper to format a Date → "yyyy‑mm‑dd hh:ii:ss"
 const formatDateTime = (d: Date) => {
   const pad = (n: number) => (n < 10 ? "0" + n : n);
   return (
@@ -84,10 +108,23 @@ const formatDateTime = (d: Date) => {
   );
 };
 
+enum MessageTheme {
+  DEFAULT = "default",
+  MUSIC = "music",
+  MOVIE = "movie",
+}
+
+const MessageThemeIcons = {
+  [MessageTheme.DEFAULT]: "document-text-outline",
+  [MessageTheme.MUSIC]: "musical-notes-outline",
+  [MessageTheme.MOVIE]: "videocam-outline",
+};
+
 const messageSchema = z.object({
   id: z.string(),
   text: z.string(),
   time: z.string(),
+  theme: z.nativeEnum(MessageTheme).optional().default(MessageTheme.DEFAULT),
 });
 type MessageSchema = z.infer<typeof messageSchema>;
 
@@ -95,6 +132,7 @@ const ChatScreen = () => {
   const [messages, setMessages] = useState<MessageSchema[]>([]);
   const [input, setInput] = useState("");
   const [filter, setFilter] = useState("");
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   const filteredMessages = useMemo(
     () =>
@@ -104,14 +142,41 @@ const ChatScreen = () => {
     [messages, filter]
   );
 
+  const handleLongPress = (id: string) => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  };
+
+  const handleDelete = async () => {
+    await AsyncStorage.multiRemove(selectedIds.map((id) => `message:${id}`));
+    setMessages((prev) => prev.filter((m) => !selectedIds.includes(m.id)));
+    setSelectedIds([]);
+  };
+
   const handleSend = async () => {
     if (!input.trim()) return;
+
+    const prevText = input.trim();
+
+    const transformText = (text: string) => {
+      const lowercaseText = text.toLowerCase();
+      if (lowercaseText.startsWith("m ")) {
+        return { theme: MessageTheme.MUSIC, text: text.slice(2) };
+      } else if (lowercaseText.startsWith("f ")) {
+        return { theme: MessageTheme.MOVIE, text: text.slice(2) };
+      }
+      return { theme: MessageTheme.DEFAULT, text };
+    };
+    const { text, theme } = transformText(prevText);
 
     const now = new Date();
     const newMsg = {
       id: uuid.v4(),
-      text: input.trim(),
+      text,
       time: formatDateTime(now),
+      theme,
     };
 
     setMessages((prev) => [...prev, newMsg]);
@@ -137,12 +202,24 @@ const ChatScreen = () => {
   }, []);
 
   const renderItem = ({ item }: { item: MessageSchema }) => (
-    <View style={styles.msgWrapper} key={item.id}>
-      <View style={styles.bubble}>
-        <Text style={styles.msgText}>{item.text}</Text>
+    <Pressable
+      onLongPress={() => handleLongPress(item.id)}
+      onPress={() => selectedIds.length && handleLongPress(item.id)}
+    >
+      <View style={styles.msgWrapper} key={item.id}>
+        <View style={styles.bubble}>
+          <Ionicons
+            name={MessageThemeIcons[item.theme]}
+            size={20}
+            color="#555"
+            style={styles.themeIcon}
+          />
+
+          <Text style={styles.msgText}>{item.text}</Text>
+        </View>
+        <Text style={styles.timestamp}>{item.time}</Text>
       </View>
-      <Text style={styles.timestamp}>{item.time}</Text>
-    </View>
+    </Pressable>
   );
 
   return (
@@ -151,6 +228,15 @@ const ChatScreen = () => {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       keyboardVerticalOffset={80}
     >
+      {selectedIds.length > 0 && (
+        <View style={styles.actionBar}>
+          <Text style={styles.actionCount}>{selectedIds.length}</Text>
+
+          <TouchableOpacity onPress={handleDelete} style={styles.actionBtn}>
+            <Ionicons name="trash-outline" size={22} color="#fff" />
+          </TouchableOpacity>
+        </View>
+      )}
       <View style={styles.filterRow}>
         <TextInput
           style={styles.filterInput}
