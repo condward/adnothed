@@ -1,5 +1,4 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Picker } from "@react-native-picker/picker";
 import React, { useEffect, useMemo, useState } from "react";
 import {
   FlatList,
@@ -15,7 +14,13 @@ import {
 } from "react-native";
 import uuid from "react-native-uuid";
 import Ionicons from "react-native-vector-icons/Ionicons";
-import { z } from "zod";
+import { ChatFilter, ChatFilterState } from "./Chat/ChatFilter";
+import {
+  messageSchema,
+  MessageSchema,
+  MessageTheme,
+  MessageThemeIcons,
+} from "./Chat/schema";
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#000", height: "100%" },
@@ -58,25 +63,6 @@ const styles = StyleSheet.create({
   },
   sendBtn: { paddingHorizontal: 10, paddingVertical: 8 },
   sendIcon: { fontSize: 18, fontWeight: "bold", color: "#007AFF" },
-  filterRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 8,
-    paddingVertical: 6,
-    marginTop: 8,
-    borderBottomWidth: 1,
-    borderColor: "#ddd",
-    backgroundColor: "white",
-  },
-  filterInput: {
-    flex: 1,
-    fontSize: 16,
-    paddingVertical: 6,
-  },
-  clearText: { fontSize: 18, paddingHorizontal: 8, opacity: 0.6 },
-  searchIcon: {
-    marginLeft: 8,
-  },
   themeIcon: {
     marginRight: 8,
   },
@@ -99,10 +85,6 @@ const styles = StyleSheet.create({
   actionBtn: {
     padding: 4,
   },
-  picker: {
-    width: 100, // enough to show “Default”, adjust as needed
-    marginLeft: 4,
-  },
 });
 
 const formatDateTime = (d: Date) => {
@@ -113,45 +95,27 @@ const formatDateTime = (d: Date) => {
   );
 };
 
-enum MessageTheme {
-  DEFAULT = "default",
-  MUSIC = "music",
-  MOVIE = "movie",
-}
-
-const MessageThemeIcons = {
-  [MessageTheme.DEFAULT]: "document-text-outline",
-  [MessageTheme.MUSIC]: "musical-notes-outline",
-  [MessageTheme.MOVIE]: "videocam-outline",
-};
-
-const messageSchema = z.object({
-  id: z.string(),
-  text: z.string(),
-  time: z.string(),
-  theme: z.nativeEnum(MessageTheme).optional().default(MessageTheme.DEFAULT),
-});
-type MessageSchema = z.infer<typeof messageSchema>;
-
 const ChatScreen = () => {
   const [messages, setMessages] = useState<MessageSchema[]>([]);
   const [input, setInput] = useState("");
-  const [filter, setFilter] = useState("");
+  const [filter, setFilter] = useState<ChatFilterState>({
+    text: "",
+    theme: "ALL",
+  });
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [themeFilter, setThemeFilter] = useState<MessageTheme | "ALL">("ALL");
 
   const filteredMessages = useMemo(
     () =>
       messages.filter((m) => {
         const matchesText = m.text
           .toLowerCase()
-          .includes(filter.trim().toLowerCase());
+          .includes(filter.text.trim().toLowerCase());
 
-        const matchesTheme = themeFilter === "ALL" || m.theme === themeFilter;
+        const matchesTheme = filter.theme === "ALL" || m.theme === filter.theme;
 
         return matchesText && matchesTheme;
       }),
-    [messages, filter, themeFilter]
+    [messages, filter]
   );
 
   const handleLongPress = (id: string) => {
@@ -249,37 +213,8 @@ const ChatScreen = () => {
           </TouchableOpacity>
         </View>
       )}
-      <View style={styles.filterRow}>
-        <Picker
-          selectedValue={themeFilter}
-          onValueChange={(v) => setThemeFilter(v)}
-          mode="dropdown"
-          style={styles.picker}
-        >
-          <Picker.Item label="All" value="ALL" />
-          <Picker.Item label="Default" value={MessageTheme.DEFAULT} />
-          <Picker.Item label="Music" value={MessageTheme.MUSIC} />
-          <Picker.Item label="Movie" value={MessageTheme.MOVIE} />
-        </Picker>
-        <TextInput
-          style={styles.filterInput}
-          placeholder="Filter messages…"
-          value={filter}
-          onChangeText={setFilter}
-          returnKeyType="search"
-        />
-        <Ionicons
-          name="search"
-          size={20}
-          color="#555"
-          style={styles.searchIcon}
-        />
-        {filter.length > 0 && (
-          <TouchableOpacity onPress={() => setFilter("")}>
-            <Text style={styles.clearText}>✕</Text>
-          </TouchableOpacity>
-        )}
-      </View>
+      <ChatFilter filter={filter} setFilter={setFilter} />
+
       <FlatList
         data={filteredMessages}
         keyExtractor={(item) => item.id}
