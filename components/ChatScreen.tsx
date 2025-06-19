@@ -1,4 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Picker } from "@react-native-picker/picker";
 import React, { useEffect, useMemo, useState } from "react";
 import {
   FlatList,
@@ -98,6 +99,10 @@ const styles = StyleSheet.create({
   actionBtn: {
     padding: 4,
   },
+  picker: {
+    width: 100, // enough to show “Default”, adjust as needed
+    marginLeft: 4,
+  },
 });
 
 const formatDateTime = (d: Date) => {
@@ -133,13 +138,20 @@ const ChatScreen = () => {
   const [input, setInput] = useState("");
   const [filter, setFilter] = useState("");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [themeFilter, setThemeFilter] = useState<MessageTheme | "ALL">("ALL");
 
   const filteredMessages = useMemo(
     () =>
-      messages.filter((m) =>
-        m.text?.toLowerCase().includes(filter.trim().toLowerCase())
-      ),
-    [messages, filter]
+      messages.filter((m) => {
+        const matchesText = m.text
+          .toLowerCase()
+          .includes(filter.trim().toLowerCase());
+
+        const matchesTheme = themeFilter === "ALL" || m.theme === themeFilter;
+
+        return matchesText && matchesTheme;
+      }),
+    [messages, filter, themeFilter]
   );
 
   const handleLongPress = (id: string) => {
@@ -238,6 +250,17 @@ const ChatScreen = () => {
         </View>
       )}
       <View style={styles.filterRow}>
+        <Picker
+          selectedValue={themeFilter}
+          onValueChange={(v) => setThemeFilter(v)}
+          mode="dropdown"
+          style={styles.picker}
+        >
+          <Picker.Item label="All" value="ALL" />
+          <Picker.Item label="Default" value={MessageTheme.DEFAULT} />
+          <Picker.Item label="Music" value={MessageTheme.MUSIC} />
+          <Picker.Item label="Movie" value={MessageTheme.MOVIE} />
+        </Picker>
         <TextInput
           style={styles.filterInput}
           placeholder="Filter messages…"
