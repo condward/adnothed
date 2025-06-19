@@ -28,15 +28,18 @@ const ChatScreen = () => {
 
   const filteredMessages = useMemo(
     () =>
-      messages.filter((m) => {
-        const matchesText = m.text
-          .toLowerCase()
-          .includes(filter.text.trim().toLowerCase());
+      messages
+        .filter((m) => {
+          const matchesText = m.text
+            .toLowerCase()
+            .includes(filter.text.trim().toLowerCase());
 
-        const matchesTheme = filter.theme === "ALL" || m.theme === filter.theme;
+          const matchesTheme =
+            filter.theme === "ALL" || m.theme === filter.theme;
 
-        return matchesText && matchesTheme;
-      }),
+          return matchesText && matchesTheme;
+        })
+        .toReversed(),
     [messages, filter]
   );
 

@@ -80,6 +80,8 @@ export const ChatInput: FC<ChatInputProps> = ({ setMessages }) => {
         placeholder="Send a message"
         value={input}
         onChangeText={setInput}
+        onSubmitEditing={handleSend}
+        returnKeyType="send"
       />
       <TouchableOpacity style={styles.sendBtn} onPress={handleSend}>
         <Text style={styles.sendIcon}>➤</Text>
