@@ -1,31 +1,37 @@
-import * as Device from "expo-device";
-import * as Notifications from "expo-notifications";
-import React, { useEffect, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import React, { useEffect, useMemo, useState } from "react";
 import {
-    FlatList,
-    KeyboardAvoidingView,
-    Platform,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  FlatList,
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
+import uuid from "react-native-uuid";
+import Ionicons from "react-native-vector-icons/Ionicons";
+import { z } from "zod";
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff", height: '100%' },
+  container: { flex: 1, backgroundColor: "#000", height: "100%" },
 
   /* --- message bubble + timestamp --- */
-  msgWrapper: { marginBottom: 20, alignSelf: "flex-start" },
+  msgWrapper: {
+    marginBottom: 20,
+    alignSelf: "flex-start",
+    flexGrow: 1,
+  },
   bubble: {
-    backgroundColor: "#e7edef",
+    backgroundColor: "lime",
     borderRadius: 8,
     paddingVertical: 8,
     paddingHorizontal: 12,
     maxWidth: "80%",
   },
   msgText: { fontSize: 16, color: "#000" },
-  timestamp: { marginTop: 4, fontSize: 12, color: "#777" },
+  timestamp: { marginTop: 4, fontSize: 12, color: "white" },
 
   /* --- list & input bar --- */
   listContent: { padding: 16 },
@@ -36,6 +42,7 @@ const styles = StyleSheet.create({
     borderColor: "#dcdcdc",
     paddingHorizontal: 8,
     paddingVertical: 6,
+    backgroundColor: "white",
   },
   textInput: {
     flex: 1,
@@ -43,9 +50,29 @@ const styles = StyleSheet.create({
     maxHeight: 120,
     padding: 8,
     fontSize: 16,
+    color: "white",
   },
   sendBtn: { paddingHorizontal: 10, paddingVertical: 8 },
   sendIcon: { fontSize: 18, fontWeight: "bold", color: "#007AFF" },
+  filterRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+    marginTop: 8,
+    borderBottomWidth: 1,
+    borderColor: "#ddd",
+    backgroundColor: "white",
+  },
+  filterInput: {
+    flex: 1,
+    fontSize: 16,
+    paddingVertical: 6,
+  },
+  clearText: { fontSize: 18, paddingHorizontal: 8, opacity: 0.6 },
+  searchIcon: {
+    marginLeft: 8,
+  },
 });
 
 // Helper to format a Date → "yyyy‑mm‑dd hh:ii:ss"
@@ -57,70 +84,60 @@ const formatDateTime = (d: Date) => {
   );
 };
 
-type Message = { id: string; text: string; time: string };
-
-const sendLocalNotification = async (bodyText: string) => {
-  if (Platform.OS === "web") {
-    if ("Notification" in window && Notification.permission === "granted") {
-      new Notification("New Message Sent", { body: bodyText });
-    }
-  } else {
-    await Notifications.scheduleNotificationAsync({
-      content: {
-        title: "New Message Sent",
-        body: bodyText,
-      },
-      trigger: null, // instant
-    });
-  }
-};
-
-async function registerForPushNotificationsAsync() {
-  if (Platform.OS === "web") {
-    if ("Notification" in window && Notification.permission !== "granted") {
-      await Notification.requestPermission();
-    }
-  } else if (Device.isDevice) {
-    const { status: existingStatus } =
-      await Notifications.getPermissionsAsync();
-    let finalStatus = existingStatus;
-    if (existingStatus !== "granted") {
-      const { status } = await Notifications.requestPermissionsAsync();
-      finalStatus = status;
-    }
-    if (finalStatus !== "granted") {
-      alert("Failed to get permission for notifications.");
-    }
-  }
-}
+const messageSchema = z.object({
+  id: z.string(),
+  text: z.string(),
+  time: z.string(),
+});
+type MessageSchema = z.infer<typeof messageSchema>;
 
 const ChatScreen = () => {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<MessageSchema[]>([]);
   const [input, setInput] = useState("");
+  const [filter, setFilter] = useState("");
 
-  useEffect(() => {
-    registerForPushNotificationsAsync();
-  }, []);
+  const filteredMessages = useMemo(
+    () =>
+      messages.filter((m) =>
+        m.text?.toLowerCase().includes(filter.trim().toLowerCase())
+      ),
+    [messages, filter]
+  );
 
   const handleSend = async () => {
     if (!input.trim()) return;
 
     const now = new Date();
     const newMsg = {
-      id: now.getTime().toString(), // simple unique id
+      id: uuid.v4(),
       text: input.trim(),
       time: formatDateTime(now),
     };
 
-    // Add newest at the end; FlatList is inverted so it will appear *above* input
     setMessages((prev) => [...prev, newMsg]);
     setInput("");
 
-    await sendLocalNotification(input.trim());
+    await AsyncStorage.setItem(`message:${newMsg.id}`, JSON.stringify(newMsg));
   };
 
-  const renderItem = ({ item }: { item: Message }) => (
-    <View style={styles.msgWrapper}>
+  useEffect(() => {
+    async function fetchData() {
+      const keys = await AsyncStorage.getAllKeys();
+      const noteKeys = keys.filter((k) => k.startsWith("message:"));
+      const messages = await AsyncStorage.multiGet(noteKeys);
+
+      const arr: MessageSchema[] = [];
+      messages.map(([key, value]) => {
+        value && arr.push(messageSchema.parse(JSON.parse(value)));
+      });
+
+      setMessages(arr);
+    }
+    fetchData();
+  }, []);
+
+  const renderItem = ({ item }: { item: MessageSchema }) => (
+    <View style={styles.msgWrapper} key={item.id}>
       <View style={styles.bubble}>
         <Text style={styles.msgText}>{item.text}</Text>
       </View>
@@ -134,9 +151,28 @@ const ChatScreen = () => {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       keyboardVerticalOffset={80}
     >
-      {/* Messages list (newest at bottom, i.e. right above the input row) */}
+      <View style={styles.filterRow}>
+        <TextInput
+          style={styles.filterInput}
+          placeholder="Filter messages…"
+          value={filter}
+          onChangeText={setFilter}
+          returnKeyType="search"
+        />
+        <Ionicons
+          name="search"
+          size={20}
+          color="#555"
+          style={styles.searchIcon}
+        />
+        {filter.length > 0 && (
+          <TouchableOpacity onPress={() => setFilter("")}>
+            <Text style={styles.clearText}>✕</Text>
+          </TouchableOpacity>
+        )}
+      </View>
       <FlatList
-        data={messages}
+        data={filteredMessages}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
         inverted // <-- flips the list so bottom is newest
@@ -150,7 +186,6 @@ const ChatScreen = () => {
           placeholder="Send a message"
           value={input}
           onChangeText={setInput}
-          multiline
         />
         <TouchableOpacity style={styles.sendBtn} onPress={handleSend}>
           <Text style={styles.sendIcon}>➤</Text>
