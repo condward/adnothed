@@ -24,7 +24,6 @@ const styles = StyleSheet.create({
     padding: 6,
   },
   textInput: {
-    flex: 1,
     minHeight: 40,
     maxHeight: 120,
     padding: 8,
@@ -38,6 +37,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "flex-start",
     padding: 4,
+    gap: 2,
   },
   shortCutContainer: {
     flex: 1,
@@ -109,7 +109,7 @@ export const ShortCutList = () => {
             <View style={styles.shortCutRow}>
               <Text style={styles.themeIcon}>{item.key}</Text>
               <Ionicons name={item.icon} size={24} />
-              <Text style={styles.themeIcon}>{item.icon}</Text>
+              <Text style={styles.themeIcon}>{item.name}</Text>
             </View>
             <View>
               <TouchableOpacity
@@ -133,7 +133,28 @@ export const ShortCutList = () => {
               value={value}
               onChangeText={onChange}
               returnKeyType="send"
-              style={[styles.textInput, error && styles.inputError]}
+              style={[
+                styles.textInput,
+                { flexGrow: 1 },
+                error && styles.inputError,
+              ]}
+            />
+          )}
+        />
+        <Controller
+          name={`newShortcut.name`}
+          control={control}
+          render={({ field: { value, onChange }, fieldState: { error } }) => (
+            <TextInput
+              style={[
+                styles.textInput,
+                { flexGrow: 4 },
+                error && styles.inputError,
+              ]}
+              placeholder="Name"
+              value={value}
+              onChangeText={onChange}
+              returnKeyType="send"
             />
           )}
         />
@@ -142,7 +163,11 @@ export const ShortCutList = () => {
           control={control}
           render={({ field: { value, onChange }, fieldState: { error } }) => (
             <TextInput
-              style={[styles.textInput, error && styles.inputError]}
+              style={[
+                styles.textInput,
+                { flexGrow: 12 },
+                error && styles.inputError,
+              ]}
               placeholder="Icon"
               value={value}
               onChangeText={onChange}
@@ -150,7 +175,10 @@ export const ShortCutList = () => {
             />
           )}
         />
-        <TouchableOpacity style={styles.sendBtn} onPress={handleSend}>
+        <TouchableOpacity
+          style={[styles.sendBtn, { flexGrow: 1 }]}
+          onPress={handleSend}
+        >
           <Text style={styles.sendIcon}>➤</Text>
         </TouchableOpacity>
       </View>

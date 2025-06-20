@@ -23,6 +23,7 @@ export const ShortCutErrors: FC<ShortCutErrorsProps> = ({ control }) => {
         newShortcut.message,
         newShortcut.key?.message,
         newShortcut.icon?.message,
+        newShortcut.name?.message,
       ]
         .filter(Boolean)
         .map((msg, index) => (
