@@ -25,9 +25,7 @@ const styles = StyleSheet.create({
     padding: 6,
   },
   textInput: {
-    minHeight: 40,
-    maxHeight: 120,
-    padding: 8,
+    padding: 2,
     margin: 1,
     fontSize: 16,
     color: "black",
@@ -98,14 +96,14 @@ export const ShortCutList = () => {
   } = useForm({
     resolver: zodResolver(editShortcutSchema),
     defaultValues: {
-      editType: {
+      edit: {
         type: null,
-        id: "",
-      },
-      editShortcut: {
-        key: "",
-        icon: "",
-        name: "",
+        values: {
+          id: "",
+          key: "",
+          icon: "",
+          name: "",
+        },
       },
     },
   });
@@ -129,14 +127,13 @@ export const ShortCutList = () => {
 
   const handleEditSend = () => {
     handleEditSubmit(
-      ({ editShortcut, editType }) => {
-        const { type, id } = editType;
-        if (type === null) return;
+      ({ edit: { type, values } }) => {
+        if (type === null || !values.id) return;
 
-        const value = editShortcut[type];
+        const value = values[type];
         if (!value) return;
 
-        editShortcuts(id, type, value);
+        editShortcuts(values.id, type, value);
         resetEdit();
       },
       (err) => console.log(err)
@@ -155,13 +152,13 @@ export const ShortCutList = () => {
         renderItem={({ item }) => (
           <View style={styles.shortCutContainer} key={item.key}>
             <Controller
-              name={`editType`}
+              name={`edit`}
               control={editControl}
-              render={({ field: { value: editType, onChange: setEdit } }) => (
+              render={({ field: { value: edit, onChange: setEdit } }) => (
                 <View style={styles.shortCutRow}>
-                  {editType.type === EditType.KEY ? (
+                  {edit.type === EditType.KEY ? (
                     <Controller
-                      name={`editShortcut.key`}
+                      name={`edit.values.key`}
                       control={editControl}
                       render={({
                         field: { value, onChange },
@@ -185,16 +182,16 @@ export const ShortCutList = () => {
                     <Text
                       style={styles.themeIcon}
                       onPress={() =>
-                        setEdit({ type: EditType.KEY, id: item.id })
+                        setEdit({ type: EditType.KEY, values: item })
                       }
                     >
                       {item.key}
                     </Text>
                   )}
 
-                  {editType.type === EditType.ICON ? (
+                  {edit.type === EditType.ICON ? (
                     <Controller
-                      name={`editShortcut.icon`}
+                      name={`edit.values.icon`}
                       control={editControl}
                       render={({
                         field: { value, onChange },
@@ -219,14 +216,14 @@ export const ShortCutList = () => {
                       name={item.icon}
                       size={24}
                       onPress={() =>
-                        setEdit({ type: EditType.ICON, id: item.id })
+                        setEdit({ type: EditType.ICON, values: item })
                       }
                     />
                   )}
 
-                  {editType.type === EditType.NAME ? (
+                  {edit.type === EditType.NAME ? (
                     <Controller
-                      name={`editShortcut.name`}
+                      name={`edit.values.name`}
                       control={editControl}
                       render={({
                         field: { value, onChange },
@@ -250,7 +247,7 @@ export const ShortCutList = () => {
                     <Text
                       style={styles.themeIcon}
                       onPress={() =>
-                        setEdit({ type: EditType.NAME, id: item.id })
+                        setEdit({ type: EditType.NAME, values: item })
                       }
                     >
                       {item.name}
@@ -264,7 +261,7 @@ export const ShortCutList = () => {
                 onPress={() => handleEditSend()}
                 style={styles.actionBtn}
               >
-                <Ionicons name="trash-outline" size={22} color="black" />
+                <Ionicons name="send-outline" size={22} color="black" />
               </TouchableOpacity>
             </View>
           </View>

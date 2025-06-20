@@ -39,10 +39,9 @@ export const shortcutsSchema = (
 export type ShortcutsSchema = z.infer<ReturnType<typeof shortcutsSchema>>;
 
 export const editShortcutSchema = z.object({
-  editShortcut: baseShortCutSchema.partial(),
-  editType: z.object({
+  edit: z.object({
     type: z.enum(["key", "icon", "name"]).nullable(),
-    id: z.string().min(1),
+    values: baseShortCutSchema.partial(),
   }),
 });
 export type EditShortcutSchema = z.infer<typeof editShortcutSchema>;
