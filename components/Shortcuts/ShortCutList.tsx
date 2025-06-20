@@ -33,6 +33,25 @@ const styles = StyleSheet.create({
     color: "black",
     backgroundColor: "white",
   },
+  shortCutRow: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "flex-start",
+    padding: 4,
+  },
+  shortCutContainer: {
+    flex: 1,
+    flexDirection: "row",
+    minHeight: 40,
+    maxHeight: 120,
+    padding: 8,
+    margin: 1,
+    fontSize: 16,
+    color: "black",
+    backgroundColor: "white",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
   sendBtn: { paddingHorizontal: 10, paddingVertical: 8 },
   sendIcon: { fontSize: 18, fontWeight: "bold", color: "#007AFF" },
   container: { flex: 1, backgroundColor: "#000", height: "100%" },
@@ -47,10 +66,13 @@ const styles = StyleSheet.create({
     marginTop: 4,
     fontSize: 14,
   },
+  actionBtn: {
+    padding: 4,
+  },
 });
 
 export const ShortCutList = () => {
-  const { shortcuts, addShortcuts } = useShortCut();
+  const { shortcuts, addShortcuts, deleteShortcuts } = useShortCut();
   const { handleSubmit, resetField, control } = useForm({
     resolver: zodResolver(shortcutsSchema(shortcuts)),
     defaultValues: {
@@ -83,13 +105,21 @@ export const ShortCutList = () => {
       <FlatList
         data={shortcuts}
         renderItem={({ item }) => (
-          <TouchableOpacity style={styles.textInput} key={item.key}>
-            <View style={styles.inputRow}>
+          <View style={styles.shortCutContainer} key={item.key}>
+            <View style={styles.shortCutRow}>
               <Text style={styles.themeIcon}>{item.key}</Text>
               <Ionicons name={item.icon} size={24} />
               <Text style={styles.themeIcon}>{item.icon}</Text>
             </View>
-          </TouchableOpacity>
+            <View>
+              <TouchableOpacity
+                onPress={() => deleteShortcuts([item.key])}
+                style={styles.actionBtn}
+              >
+                <Ionicons name="trash-outline" size={22} color="black" />
+              </TouchableOpacity>
+            </View>
+          </View>
         )}
         keyExtractor={(item) => item.key}
       />
