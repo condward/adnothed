@@ -10,8 +10,9 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import uuid from "react-native-uuid";
 import Ionicons from "react-native-vector-icons/Ionicons";
-import { shortcutsSchema } from "./schema";
+import { editShortcutSchema, shortcutsSchema } from "./schema";
 import { ShortCutErrors } from "./ShortCutErrors";
 import { useShortcuts } from "./ShortCutsProvider";
 
@@ -71,14 +72,40 @@ const styles = StyleSheet.create({
   },
 });
 
+enum EditType {
+  ICON = "icon",
+  NAME = "name",
+  KEY = "key",
+}
+
 export const ShortCutList = () => {
-  const { shortcuts, addShortcuts, deleteShortcuts } = useShortcuts();
+  const { shortcuts, addShortcuts, editShortcuts } = useShortcuts();
   const { handleSubmit, resetField, control } = useForm({
     resolver: zodResolver(shortcutsSchema(shortcuts)),
     defaultValues: {
       newShortcut: {
+        id: uuid.v4().toString(),
         key: "",
         icon: "",
+        name: "",
+      },
+    },
+  });
+  const {
+    handleSubmit: handleEditSubmit,
+    reset: resetEdit,
+    control: editControl,
+  } = useForm({
+    resolver: zodResolver(editShortcutSchema),
+    defaultValues: {
+      editType: {
+        type: null,
+        id: "",
+      },
+      editShortcut: {
+        key: "",
+        icon: "",
+        name: "",
       },
     },
   });
@@ -87,7 +114,30 @@ export const ShortCutList = () => {
     handleSubmit(
       ({ newShortcut }) => {
         addShortcuts(newShortcut);
-        resetField("newShortcut");
+        resetField("newShortcut", {
+          defaultValue: {
+            id: uuid.v4().toString(),
+            key: "",
+            icon: "",
+            name: "",
+          },
+        });
+      },
+      (err) => console.log(err)
+    )();
+  };
+
+  const handleEditSend = () => {
+    handleEditSubmit(
+      ({ editShortcut, editType }) => {
+        const { type, id } = editType;
+        if (type === null) return;
+
+        const value = editShortcut[type];
+        if (!value) return;
+
+        editShortcuts(id, type, value);
+        resetEdit();
       },
       (err) => console.log(err)
     )();
@@ -104,14 +154,114 @@ export const ShortCutList = () => {
         data={shortcuts}
         renderItem={({ item }) => (
           <View style={styles.shortCutContainer} key={item.key}>
-            <View style={styles.shortCutRow}>
-              <Text style={styles.themeIcon}>{item.key}</Text>
-              <Ionicons name={item.icon} size={24} />
-              <Text style={styles.themeIcon}>{item.name}</Text>
-            </View>
+            <Controller
+              name={`editType`}
+              control={editControl}
+              render={({ field: { value: editType, onChange: setEdit } }) => (
+                <View style={styles.shortCutRow}>
+                  {editType.type === EditType.KEY ? (
+                    <Controller
+                      name={`editShortcut.key`}
+                      control={editControl}
+                      render={({
+                        field: { value, onChange },
+                        fieldState: { error },
+                      }) => (
+                        <TextInput
+                          placeholder="Key"
+                          value={value}
+                          onChangeText={onChange}
+                          onSubmitEditing={handleEditSend}
+                          returnKeyType="send"
+                          style={[
+                            styles.textInput,
+                            { flexGrow: 1 },
+                            error && styles.inputError,
+                          ]}
+                        />
+                      )}
+                    />
+                  ) : (
+                    <Text
+                      style={styles.themeIcon}
+                      onPress={() =>
+                        setEdit({ type: EditType.KEY, id: item.id })
+                      }
+                    >
+                      {item.key}
+                    </Text>
+                  )}
+
+                  {editType.type === EditType.ICON ? (
+                    <Controller
+                      name={`editShortcut.icon`}
+                      control={editControl}
+                      render={({
+                        field: { value, onChange },
+                        fieldState: { error },
+                      }) => (
+                        <TextInput
+                          placeholder="Icon"
+                          value={value}
+                          onChangeText={onChange}
+                          onSubmitEditing={handleEditSend}
+                          returnKeyType="send"
+                          style={[
+                            styles.textInput,
+                            { flexGrow: 1 },
+                            error && styles.inputError,
+                          ]}
+                        />
+                      )}
+                    />
+                  ) : (
+                    <Ionicons
+                      name={item.icon}
+                      size={24}
+                      onPress={() =>
+                        setEdit({ type: EditType.ICON, id: item.id })
+                      }
+                    />
+                  )}
+
+                  {editType.type === EditType.NAME ? (
+                    <Controller
+                      name={`editShortcut.name`}
+                      control={editControl}
+                      render={({
+                        field: { value, onChange },
+                        fieldState: { error },
+                      }) => (
+                        <TextInput
+                          placeholder="Name"
+                          value={value}
+                          onChangeText={onChange}
+                          onSubmitEditing={handleEditSend}
+                          returnKeyType="send"
+                          style={[
+                            styles.textInput,
+                            { flexGrow: 1 },
+                            error && styles.inputError,
+                          ]}
+                        />
+                      )}
+                    />
+                  ) : (
+                    <Text
+                      style={styles.themeIcon}
+                      onPress={() =>
+                        setEdit({ type: EditType.NAME, id: item.id })
+                      }
+                    >
+                      {item.name}
+                    </Text>
+                  )}
+                </View>
+              )}
+            />
             <View>
               <TouchableOpacity
-                onPress={() => deleteShortcuts([item.key])}
+                onPress={() => handleEditSend()}
                 style={styles.actionBtn}
               >
                 <Ionicons name="trash-outline" size={22} color="black" />
@@ -122,6 +272,21 @@ export const ShortCutList = () => {
         keyExtractor={(item) => item.key}
       />
       <View style={styles.inputRow}>
+        <Controller
+          name={`newShortcut.id`}
+          control={control}
+          render={({ field: { value, onChange }, fieldState: { error } }) => (
+            <TextInput
+              placeholder="Id"
+              value={value}
+              onChangeText={onChange}
+              returnKeyType="send"
+              style={{
+                display: "none",
+              }}
+            />
+          )}
+        />
         <Controller
           name={`newShortcut.key`}
           control={control}

@@ -3,6 +3,7 @@ import { z } from "zod";
 const ioniconNames = Object.keys(ionicons);
 
 export const baseShortCutSchema = z.object({
+  id: z.string().min(1),
   key: z.string().min(0).max(1),
   name: z.string().min(1),
   icon: z
@@ -15,7 +16,7 @@ export const baseShortCutSchema = z.object({
 export type BaseShortCutSchema = z.infer<typeof baseShortCutSchema>;
 
 export const shortcutSchema = (
-  icons: { key: string; icon: string; name: string }[]
+  icons: { key: string; icon: string; name: string; id: string }[]
 ) =>
   baseShortCutSchema
     .refine(({ icon }) => !icons.some((i) => i.icon === icon), {
@@ -30,9 +31,18 @@ export const shortcutSchema = (
 export type ShortcutSchema = z.infer<ReturnType<typeof shortcutSchema>>;
 
 export const shortcutsSchema = (
-  existingIcons: { key: string; icon: string; name: string }[]
+  existingIcons: { key: string; icon: string; name: string; id: string }[]
 ) =>
   z.object({
     newShortcut: shortcutSchema(existingIcons),
   });
 export type ShortcutsSchema = z.infer<ReturnType<typeof shortcutsSchema>>;
+
+export const editShortcutSchema = z.object({
+  editShortcut: baseShortCutSchema.partial(),
+  editType: z.object({
+    type: z.enum(["key", "icon", "name"]).nullable(),
+    id: z.string().min(1),
+  }),
+});
+export type EditShortcutSchema = z.infer<typeof editShortcutSchema>;

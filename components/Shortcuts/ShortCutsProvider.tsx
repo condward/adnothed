@@ -13,6 +13,11 @@ interface ShortcutContextValue {
   shortcuts: ShortcutSchema[];
   addShortcuts: (shortcut: ShortcutSchema) => Promise<void>;
   deleteShortcuts: (ids: string[]) => Promise<void>;
+  editShortcuts: (
+    id: string,
+    type: "key" | "icon" | "name",
+    value: string
+  ) => Promise<void>;
 }
 
 const ShortcutContext = createContext<ShortcutContextValue | undefined>(
@@ -25,14 +30,30 @@ export const ShortcutProvider: React.FC<React.PropsWithChildren> = ({
   const [shortcuts, setShortcuts] = useState<ShortcutSchema[]>([]);
 
   const deleteShortcuts = useCallback(async (ids: string[]) => {
-    setShortcuts((prev) => prev.filter((m) => !ids.includes(m.key)));
+    setShortcuts((prev) => prev.filter((m) => !ids.includes(m.id)));
     await AsyncStorage.multiRemove(ids.map((id) => `shortcut:${id}`));
   }, []);
+
+  const editShortcuts = useCallback(
+    async (id: string, type: "key" | "icon" | "name", value: string) => {
+      setShortcuts((prev) =>
+        prev.map((shortcut) =>
+          shortcut.id === id ? { ...shortcut, [type]: value } : shortcut
+        )
+      );
+
+      await AsyncStorage.setItem(
+        `shortcut:${id}`,
+        JSON.stringify({ ...shortcuts.find((s) => s.id === id), [type]: value })
+      );
+    },
+    [shortcuts]
+  );
 
   const addShortcuts = useCallback(async (shortcut: ShortcutSchema) => {
     setShortcuts((prev) => [...prev, shortcut]);
     await AsyncStorage.setItem(
-      `shortcut:${shortcut.key}`,
+      `shortcut:${shortcut.id}`,
       JSON.stringify(shortcut)
     );
   }, []);
@@ -63,8 +84,9 @@ export const ShortcutProvider: React.FC<React.PropsWithChildren> = ({
       shortcuts,
       addShortcuts,
       deleteShortcuts,
+      editShortcuts,
     }),
-    [shortcuts, addShortcuts, deleteShortcuts]
+    [shortcuts, addShortcuts, deleteShortcuts, editShortcuts]
   );
 
   return (

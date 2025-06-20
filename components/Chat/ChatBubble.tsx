@@ -38,7 +38,7 @@ export const ChatBubble: FC<ChatBubbleProps> = ({
   handleLongPress,
   shortcuts,
 }) => {
-  const shortcut = shortcuts.find((s) => s.name === item.name);
+  const shortcut = shortcuts.find((s) => s.id === item.shortcutId);
 
   return (
     <Pressable

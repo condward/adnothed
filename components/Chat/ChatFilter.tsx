@@ -31,7 +31,7 @@ const styles = StyleSheet.create({
 });
 
 export type ChatFilterState = {
-  name: string;
+  id: string;
   text: string;
 };
 
@@ -49,18 +49,18 @@ export const ChatFilter: FC<ChatFilterProps> = ({
   return (
     <View style={styles.filterRow}>
       <Picker
-        selectedValue={filter.name}
-        onValueChange={(v) => setFilter({ ...filter, name: v })}
+        selectedValue={filter.id}
+        onValueChange={(v) => setFilter({ ...filter, id: v })}
         mode="dropdown"
         style={styles.picker}
       >
-        <Picker.Item label="All" value="all" />
-        <Picker.Item label="Default" value="default" />
+        <Picker.Item label="All" value="All" />
+        <Picker.Item label="Default" value="Default" />
         {shortcuts.map((shortcut) => (
           <Picker.Item
-            key={shortcut.name}
+            key={shortcut.id}
             label={shortcut.name}
-            value={shortcut.name}
+            value={shortcut.id}
           />
         ))}
       </Picker>

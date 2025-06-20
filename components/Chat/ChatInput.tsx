@@ -61,18 +61,18 @@ export const ChatInput: FC<ChatInputProps> = ({ setMessages, shortcuts }) => {
       );
 
       if (currentShortCut) {
-        return { name: currentShortCut.name, text: text.slice(2) };
+        return { shortcutId: currentShortCut.id, text: text.slice(2) };
       }
-      return { name: "Default", text };
+      return { shortcutId: "Default", text };
     };
-    const { text, name } = transformText(prevText);
+    const { text, shortcutId } = transformText(prevText);
 
     const now = new Date();
     const newMsg = {
       id: uuid.v4(),
       text,
       time: formatDateTime(now),
-      name,
+      shortcutId,
     };
 
     setMessages(newMsg);
