@@ -1,4 +1,4 @@
-import ChatScreen from "@/components/ChatScreen";
+import ChatScreen from "@/components/Chat/ChatScreen";
 import { Platform, SafeAreaView, StatusBar, StyleSheet } from "react-native";
 
 const styles = StyleSheet.create({

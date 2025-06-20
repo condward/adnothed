@@ -13,7 +13,7 @@ import {
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { shortcutsSchema } from "./schema";
 import { ShortCutErrors } from "./ShortCutErrors";
-import { useShortCut } from "./useShortcutStorage";
+import { useShortcuts } from "./ShortCutsProvider";
 
 const styles = StyleSheet.create({
   inputRow: {
@@ -72,7 +72,7 @@ const styles = StyleSheet.create({
 });
 
 export const ShortCutList = () => {
-  const { shortcuts, addShortcuts, deleteShortcuts } = useShortCut();
+  const { shortcuts, addShortcuts, deleteShortcuts } = useShortcuts();
   const { handleSubmit, resetField, control } = useForm({
     resolver: zodResolver(shortcutsSchema(shortcuts)),
     defaultValues: {

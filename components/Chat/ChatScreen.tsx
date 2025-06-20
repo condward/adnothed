@@ -6,13 +6,13 @@ import {
   Platform,
   StyleSheet,
 } from "react-native";
-import { ChatBar } from "./Chat/ChatBar";
-import { ChatBubble } from "./Chat/ChatBubble";
-import { ChatFilter, ChatFilterState } from "./Chat/ChatFilter";
-import { ChatInput } from "./Chat/ChatInput";
-import { MessageSchema } from "./Chat/schema";
-import { useMessageStorage } from "./Chat/useMessageStorage";
-import { useShortCut } from "./Shortcuts/useShortcutStorage";
+import { useShortcuts } from "../Shortcuts/ShortCutsProvider";
+import { ChatBar } from "./ChatBar";
+import { ChatBubble } from "./ChatBubble";
+import { ChatFilter, ChatFilterState } from "./ChatFilter";
+import { ChatInput } from "./ChatInput";
+import { MessageSchema } from "./schema";
+import { useMessageStorage } from "./useMessageStorage";
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#000", height: "100%" },
@@ -20,7 +20,7 @@ const styles = StyleSheet.create({
 });
 
 const ChatScreen = () => {
-  const { shortcuts } = useShortCut();
+  const { shortcuts } = useShortcuts();
   const { addMessages, deleteMessages, messages } = useMessageStorage();
 
   const [filter, setFilter] = useState<ChatFilterState>({
