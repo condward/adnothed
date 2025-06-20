@@ -2,7 +2,7 @@ import { Picker } from "@react-native-picker/picker";
 import { FC } from "react";
 import { StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
-import { MessageTheme } from "./schema";
+import { BaseShortCutSchema } from "../Shortcuts/schema";
 
 const styles = StyleSheet.create({
   filterRow: {
@@ -31,28 +31,38 @@ const styles = StyleSheet.create({
 });
 
 export type ChatFilterState = {
-  theme: MessageTheme | "ALL";
+  name: string;
   text: string;
 };
 
 type ChatFilterProps = {
   filter: ChatFilterState;
   setFilter: (filter: ChatFilterState) => void;
+  shortcuts: BaseShortCutSchema[];
 };
 
-export const ChatFilter: FC<ChatFilterProps> = ({ filter, setFilter }) => {
+export const ChatFilter: FC<ChatFilterProps> = ({
+  filter,
+  setFilter,
+  shortcuts,
+}) => {
   return (
     <View style={styles.filterRow}>
       <Picker
-        selectedValue={filter.theme}
-        onValueChange={(v) => setFilter({ ...filter, theme: v })}
+        selectedValue={filter.name}
+        onValueChange={(v) => setFilter({ ...filter, name: v })}
         mode="dropdown"
         style={styles.picker}
       >
-        <Picker.Item label="All" value="ALL" />
-        <Picker.Item label="Default" value={MessageTheme.DEFAULT} />
-        <Picker.Item label="Music" value={MessageTheme.MUSIC} />
-        <Picker.Item label="Movie" value={MessageTheme.MOVIE} />
+        <Picker.Item label="All" value="all" />
+        <Picker.Item label="Default" value="default" />
+        {shortcuts.map((shortcut) => (
+          <Picker.Item
+            key={shortcut.name}
+            label={shortcut.name}
+            value={shortcut.name}
+          />
+        ))}
       </Picker>
       <TextInput
         style={styles.filterInput}

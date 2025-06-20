@@ -12,6 +12,7 @@ export const baseShortCutSchema = z.object({
       message: "Invalid Ionicon name",
     }),
 });
+export type BaseShortCutSchema = z.infer<typeof baseShortCutSchema>;
 
 export const shortcutSchema = (
   icons: { key: string; icon: string; name: string }[]

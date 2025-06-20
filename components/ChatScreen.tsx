@@ -12,6 +12,7 @@ import { ChatFilter, ChatFilterState } from "./Chat/ChatFilter";
 import { ChatInput } from "./Chat/ChatInput";
 import { MessageSchema } from "./Chat/schema";
 import { useMessageStorage } from "./Chat/useMessageStorage";
+import { useShortCut } from "./Shortcuts/useShortcutStorage";
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#000", height: "100%" },
@@ -19,10 +20,12 @@ const styles = StyleSheet.create({
 });
 
 const ChatScreen = () => {
+  const { shortcuts } = useShortCut();
   const { addMessages, deleteMessages, messages } = useMessageStorage();
+
   const [filter, setFilter] = useState<ChatFilterState>({
     text: "",
-    theme: "ALL",
+    name: "all",
   });
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
@@ -34,8 +37,7 @@ const ChatScreen = () => {
             .toLowerCase()
             .includes(filter.text.trim().toLowerCase());
 
-          const matchesTheme =
-            filter.theme === "ALL" || m.theme === filter.theme;
+          const matchesTheme = filter.name === "all" || m.name === filter.name;
 
           return matchesText && matchesTheme;
         })
@@ -60,6 +62,7 @@ const ChatScreen = () => {
       item={item}
       selectedIds={selectedIds}
       handleLongPress={handleLongPress}
+      shortcuts={shortcuts}
     />
   );
 
@@ -70,7 +73,7 @@ const ChatScreen = () => {
       keyboardVerticalOffset={80}
     >
       <ChatBar selectedIds={selectedIds} handleDelete={handleDelete} />
-      <ChatFilter filter={filter} setFilter={setFilter} />
+      <ChatFilter filter={filter} setFilter={setFilter} shortcuts={shortcuts} />
       <FlatList
         data={filteredMessages}
         keyExtractor={(item) => item.id}
@@ -78,7 +81,7 @@ const ChatScreen = () => {
         inverted
         contentContainerStyle={styles.listContent}
       />
-      <ChatInput setMessages={addMessages} />
+      <ChatInput setMessages={addMessages} shortcuts={shortcuts} />
     </KeyboardAvoidingView>
   );
 };

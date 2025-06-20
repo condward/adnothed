@@ -84,10 +84,8 @@ export const ShortCutList = () => {
   });
 
   const handleSend = () => {
-    console.log("hero");
     handleSubmit(
       ({ newShortcut }) => {
-        console.log("Sending shortcuts:", newShortcut);
         addShortcuts(newShortcut);
         resetField("newShortcut");
       },

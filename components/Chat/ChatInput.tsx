@@ -7,7 +7,8 @@ import {
   View,
 } from "react-native";
 import uuid from "react-native-uuid";
-import { MessageSchema, MessageTheme } from "./schema";
+import { BaseShortCutSchema } from "../Shortcuts/schema";
+import { MessageSchema } from "./schema";
 
 const styles = StyleSheet.create({
   inputRow: {
@@ -41,9 +42,10 @@ const formatDateTime = (d: Date) => {
 
 type ChatInputProps = {
   setMessages: (messages: MessageSchema) => void;
+  shortcuts: BaseShortCutSchema[];
 };
 
-export const ChatInput: FC<ChatInputProps> = ({ setMessages }) => {
+export const ChatInput: FC<ChatInputProps> = ({ setMessages, shortcuts }) => {
   const [input, setInput] = useState("");
 
   const handleSend = async () => {
@@ -53,21 +55,24 @@ export const ChatInput: FC<ChatInputProps> = ({ setMessages }) => {
 
     const transformText = (text: string) => {
       const lowercaseText = text.toLowerCase();
-      if (lowercaseText.startsWith("m ")) {
-        return { theme: MessageTheme.MUSIC, text: text.slice(2) };
-      } else if (lowercaseText.startsWith("f ")) {
-        return { theme: MessageTheme.MOVIE, text: text.slice(2) };
+
+      const currentShortCut = shortcuts.find((shortcut) =>
+        lowercaseText.startsWith(`${shortcut.key} `)
+      );
+
+      if (currentShortCut) {
+        return { name: currentShortCut.name, text: text.slice(2) };
       }
-      return { theme: MessageTheme.DEFAULT, text };
+      return { name: "Default", text };
     };
-    const { text, theme } = transformText(prevText);
+    const { text, name } = transformText(prevText);
 
     const now = new Date();
     const newMsg = {
       id: uuid.v4(),
       text,
       time: formatDateTime(now),
-      theme,
+      name,
     };
 
     setMessages(newMsg);
