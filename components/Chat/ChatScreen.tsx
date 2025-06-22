@@ -13,9 +13,10 @@ import { ChatFilter, ChatFilterState } from "./ChatFilter";
 import { ChatInput } from "./ChatInput";
 import { MessageSchema } from "./schema";
 import { useMessageStorage } from "./useMessageStorage";
+import { colors } from "../colors";
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#000", height: "100%" },
+  container: { flex: 1, backgroundColor: colors.MEDIUM, height: "100%" },
   listContent: { padding: 16 },
 });
 

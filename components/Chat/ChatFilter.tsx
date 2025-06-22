@@ -3,17 +3,18 @@ import { FC } from "react";
 import { StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { BaseShortCutSchema } from "../Shortcuts/schema";
+import { colors } from "../colors";
 
 const styles = StyleSheet.create({
   filterRow: {
     flexDirection: "row",
     alignItems: "center",
+    gap: 8,
     paddingHorizontal: 8,
     paddingVertical: 6,
-    marginTop: 8,
     borderBottomWidth: 1,
-    borderColor: "#ddd",
-    backgroundColor: "white",
+    borderColor: colors.DARK,
+    backgroundColor: colors.LIGHT,
   },
   filterInput: {
     flex: 1,
@@ -24,6 +25,7 @@ const styles = StyleSheet.create({
   picker: {
     width: 100,
     marginLeft: 4,
+    padding: 4,
   },
   searchIcon: {
     marginLeft: 8,

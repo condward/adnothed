@@ -11,21 +11,22 @@ import { shortcutsSchema } from "./schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useShortcuts } from "./ShortCutsProvider";
 import { ShortCutErrors } from "./ShortCutErrors";
+import { colors } from "../colors";
 
 const styles = StyleSheet.create({
   inputRow: {
     flexDirection: "row",
     alignItems: "flex-start",
     borderTopWidth: 1,
-    borderColor: "#dcdcdc",
+    borderColor: colors.DARK,
     padding: 6,
   },
   textInput: {
     padding: 2,
     margin: 1,
     fontSize: 16,
-    color: "black",
-    backgroundColor: "white",
+    color: colors.DARK,
+    backgroundColor: colors.LIGHT,
   },
 
   sendBtn: { paddingHorizontal: 10, paddingVertical: 8 },

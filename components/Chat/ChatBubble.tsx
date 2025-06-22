@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { BaseShortCutSchema } from "../Shortcuts/schema";
 import { MessageSchema } from "./schema";
+import { colors } from "../colors";
 
 const styles = StyleSheet.create({
   msgWrapper: {
@@ -12,13 +13,13 @@ const styles = StyleSheet.create({
   },
   bubble: {
     flexDirection: "row",
-    backgroundColor: "lime",
+    backgroundColor: colors.DARK,
     borderRadius: 8,
     paddingVertical: 8,
     paddingHorizontal: 12,
     maxWidth: "80%",
   },
-  msgText: { fontSize: 16, color: "#000" },
+  msgText: { fontSize: 16, color: "white" },
   timestamp: { marginTop: 4, fontSize: 12, color: "white" },
   themeIcon: {
     marginRight: 8,
@@ -50,7 +51,7 @@ export const ChatBubble: FC<ChatBubbleProps> = ({
           <Ionicons
             name={shortcut?.icon ?? "document-outline"}
             size={20}
-            color="#555"
+            color="white"
             style={styles.themeIcon}
           />
 

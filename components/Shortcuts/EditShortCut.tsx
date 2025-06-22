@@ -11,6 +11,9 @@ import {
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { editShortcutSchema } from "./schema";
 import { useShortcuts } from "./ShortCutsProvider";
+import { colors } from "../colors";
+
+// musical-notes
 
 const styles = StyleSheet.create({
   textInput: {
@@ -18,7 +21,7 @@ const styles = StyleSheet.create({
     margin: 1,
     fontSize: 16,
     color: "black",
-    backgroundColor: "white",
+    backgroundColor: colors.LIGHT,
   },
   shortCutRow: {
     flex: 1,
@@ -36,13 +39,12 @@ const styles = StyleSheet.create({
     margin: 1,
     fontSize: 16,
     color: "black",
-    backgroundColor: "white",
+    backgroundColor: colors.DARK,
     justifyContent: "space-between",
     alignItems: "center",
   },
   sendBtn: { paddingHorizontal: 10, paddingVertical: 8 },
-  sendIcon: { fontSize: 18, fontWeight: "bold", color: "#007AFF" },
-  container: { flex: 1, backgroundColor: "#000", height: "100%" },
+  sendIcon: { fontSize: 18, fontWeight: "bold", color: colors.DARK },
   themeIcon: {
     marginRight: 8,
   },

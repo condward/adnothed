@@ -9,16 +9,17 @@ import {
 import uuid from "react-native-uuid";
 import { BaseShortCutSchema } from "../Shortcuts/schema";
 import { MessageSchema } from "./schema";
+import { colors } from "../colors";
 
 const styles = StyleSheet.create({
   inputRow: {
     flexDirection: "row",
     alignItems: "flex-end",
     borderTopWidth: 1,
-    borderColor: "#dcdcdc",
+    borderColor: colors.DARK,
     paddingHorizontal: 8,
     paddingVertical: 6,
-    backgroundColor: "white",
+    backgroundColor: colors.LIGHT,
   },
   textInput: {
     flex: 1,
@@ -26,7 +27,7 @@ const styles = StyleSheet.create({
     maxHeight: 120,
     padding: 8,
     fontSize: 16,
-    color: "black",
+    color: colors.DARK,
   },
   sendBtn: { paddingHorizontal: 10, paddingVertical: 8 },
   sendIcon: { fontSize: 18, fontWeight: "bold", color: "#007AFF" },
