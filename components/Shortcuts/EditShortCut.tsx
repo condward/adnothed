@@ -20,7 +20,7 @@ const styles = StyleSheet.create({
     padding: 2,
     margin: 1,
     fontSize: 16,
-    color: "black",
+    color: colors.DARK,
     backgroundColor: colors.LIGHT,
   },
   shortCutRow: {
@@ -38,7 +38,7 @@ const styles = StyleSheet.create({
     padding: 8,
     margin: 1,
     fontSize: 16,
-    color: "black",
+    color: colors.DARK,
     backgroundColor: colors.DARK,
     justifyContent: "space-between",
     alignItems: "center",

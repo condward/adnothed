@@ -15,11 +15,16 @@ import { colors } from "../colors";
 
 const styles = StyleSheet.create({
   inputRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
+    flexDirection: "column",
     borderTopWidth: 1,
     borderColor: colors.DARK,
     padding: 6,
+  },
+  inputLayer: {
+    flexDirection: "row",
+    borderColor: colors.DARK,
+    padding: 6,
+    justifyContent: "space-between",
   },
   textInput: {
     padding: 2,
@@ -28,9 +33,7 @@ const styles = StyleSheet.create({
     color: colors.DARK,
     backgroundColor: colors.LIGHT,
   },
-
-  sendBtn: { paddingHorizontal: 10, paddingVertical: 8 },
-  sendIcon: { fontSize: 18, fontWeight: "bold", color: "#007AFF" },
+  sendIcon: { fontSize: 18, fontWeight: "bold", color: colors.DARK },
   inputError: {
     borderColor: "red",
   },
@@ -73,78 +76,70 @@ export const AddShortCut = () => {
   return (
     <View style={styles.inputRow}>
       <ShortCutErrors control={control} />
-      <Controller
-        name={`newShortcut.id`}
-        control={control}
-        render={({ field: { value, onChange }, fieldState: { error } }) => (
-          <TextInput
-            placeholder="Id"
-            value={value}
-            onChangeText={onChange}
-            returnKeyType="send"
-            style={{
-              display: "none",
-            }}
-          />
-        )}
-      />
-      <Controller
-        name={`newShortcut.key`}
-        control={control}
-        render={({ field: { value, onChange }, fieldState: { error } }) => (
-          <TextInput
-            placeholder="Key"
-            value={value}
-            onChangeText={onChange}
-            returnKeyType="send"
-            style={[
-              styles.textInput,
-              { flexGrow: 1 },
-              error && styles.inputError,
-            ]}
-          />
-        )}
-      />
-      <Controller
-        name={`newShortcut.name`}
-        control={control}
-        render={({ field: { value, onChange }, fieldState: { error } }) => (
-          <TextInput
-            style={[
-              styles.textInput,
-              { flexGrow: 4 },
-              error && styles.inputError,
-            ]}
-            placeholder="Name"
-            value={value}
-            onChangeText={onChange}
-            returnKeyType="send"
-          />
-        )}
-      />
-      <Controller
-        name={`newShortcut.icon`}
-        control={control}
-        render={({ field: { value, onChange }, fieldState: { error } }) => (
-          <TextInput
-            style={[
-              styles.textInput,
-              { flexGrow: 12 },
-              error && styles.inputError,
-            ]}
-            placeholder="Icon"
-            value={value}
-            onChangeText={onChange}
-            returnKeyType="send"
-          />
-        )}
-      />
-      <TouchableOpacity
-        style={[styles.sendBtn, { flexGrow: 1 }]}
-        onPress={handleSend}
-      >
-        <Text style={styles.sendIcon}>➤</Text>
-      </TouchableOpacity>
+      <View style={styles.inputLayer}>
+        <Controller
+          name={`newShortcut.id`}
+          control={control}
+          render={({ field: { value, onChange }, fieldState: { error } }) => (
+            <TextInput
+              placeholder="Id"
+              value={value}
+              onChangeText={onChange}
+              returnKeyType="send"
+              style={{
+                display: "none",
+              }}
+            />
+          )}
+        />
+        <Controller
+          name={`newShortcut.key`}
+          control={control}
+          render={({ field: { value, onChange }, fieldState: { error } }) => (
+            <TextInput
+              placeholder="Key"
+              value={value}
+              onChangeText={onChange}
+              returnKeyType="send"
+              style={[styles.textInput, error && styles.inputError]}
+            />
+          )}
+        />
+
+        <Controller
+          name={`newShortcut.name`}
+          control={control}
+          render={({ field: { value, onChange }, fieldState: { error } }) => (
+            <TextInput
+              style={[styles.textInput, error && styles.inputError]}
+              placeholder="Name"
+              value={value}
+              onChangeText={onChange}
+              returnKeyType="send"
+            />
+          )}
+        />
+      </View>
+      <View style={styles.inputLayer}>
+        <Controller
+          name={`newShortcut.icon`}
+          control={control}
+          render={({ field: { value, onChange }, fieldState: { error } }) => (
+            <TextInput
+              style={[styles.textInput, error && styles.inputError]}
+              placeholder="Icon"
+              value={value}
+              onChangeText={onChange}
+              returnKeyType="send"
+            />
+          )}
+        />
+        <View style={styles.inputLayer}>
+          <TouchableOpacity onPress={handleSend}>
+            <Text style={styles.sendIcon}>➤</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
     </View>
   );
 };
