@@ -9,7 +9,7 @@ import {
 import { useShortcuts } from "../Shortcuts/ShortCutsProvider";
 import { ChatBar } from "./ChatBar";
 import { ChatBubble } from "./ChatBubble";
-import { ChatFilter, ChatFilterState } from "./ChatFilter";
+import { ChatFilter } from "./ChatFilter";
 import { ChatInput } from "./ChatInput";
 import { MessageSchema } from "./schema";
 import { useMessageStorage } from "./useMessageStorage";
@@ -23,29 +23,9 @@ const styles = StyleSheet.create({
 const ChatScreen = () => {
   const { shortcuts } = useShortcuts();
   const { addMessages, deleteMessages, messages } = useMessageStorage();
-
-  const [filter, setFilter] = useState<ChatFilterState>({
-    text: "",
-    id: "All",
-  });
+  const [filteredMessages, setFilteredMessages] =
+    useState<MessageSchema[]>(messages);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-
-  const filteredMessages = useMemo(
-    () =>
-      messages
-        .filter((m) => {
-          const matchesText = m.text
-            .toLowerCase()
-            .includes(filter.text.trim().toLowerCase());
-
-          const matchesTheme =
-            filter.id === "All" || m.shortcutId === filter.id;
-
-          return matchesText && matchesTheme;
-        })
-        .toReversed(),
-    [messages, filter]
-  );
 
   const handleLongPress = (id: string) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -75,7 +55,11 @@ const ChatScreen = () => {
       keyboardVerticalOffset={80}
     >
       <ChatBar selectedIds={selectedIds} handleDelete={handleDelete} />
-      <ChatFilter filter={filter} setFilter={setFilter} shortcuts={shortcuts} />
+      <ChatFilter
+        messages={messages}
+        setFilteredMessages={setFilteredMessages}
+        shortcuts={shortcuts}
+      />
       <FlatList
         data={filteredMessages}
         keyExtractor={(item) => item.id}

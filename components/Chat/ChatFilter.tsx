@@ -16,6 +16,10 @@ import DateTimePicker, {
   DateType,
   useDefaultStyles,
 } from "react-native-ui-datepicker";
+import z from "zod";
+import { Controller, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { MessageSchema } from "./schema";
 
 const styles = StyleSheet.create({
   filterContainer: {
@@ -64,97 +68,179 @@ const styles = StyleSheet.create({
   },
 });
 
-export type ChatFilterState = {
-  id: string;
-  text: string;
-};
+const filterSchema = z.object({
+  text: z.string(),
+  categoryId: z.string().optional(),
+  hasLink: z.boolean(),
+  dateRange: z.object({
+    startDate: z.date().optional(),
+    endDate: z.date().optional(),
+  }),
+});
+export type FilterSchema = z.infer<typeof filterSchema>;
 
 type ChatFilterProps = {
-  filter: ChatFilterState;
-  setFilter: (filter: ChatFilterState) => void;
+  setFilteredMessages: (messages: MessageSchema[]) => void;
   shortcuts: BaseShortCutSchema[];
+  messages: MessageSchema[];
 };
 
 export const ChatFilter: FC<ChatFilterProps> = ({
-  filter,
-  setFilter,
+  setFilteredMessages,
   shortcuts,
+  messages,
 }) => {
   const [showDate, setShowDate] = useState(false);
   const defaultStyles = useDefaultStyles();
-  const [selected, setSelected] = useState<{
-    startDate: DateType;
-    endDate: DateType;
-  }>();
-  const [hasLink, setHasLink] = useState(false);
+
+  const { handleSubmit, resetField, control } = useForm({
+    resolver: zodResolver(filterSchema),
+    defaultValues: {
+      text: "",
+      categoryId: "All",
+      hasLink: false,
+      dateRange: {
+        startDate: undefined,
+        endDate: undefined,
+      },
+    },
+  });
+
+  const handleFilterMessages = handleSubmit(({ text, categoryId }) => {
+    setFilteredMessages(
+      messages
+        .filter((m) => {
+          const matchesText = m.text
+            .toLowerCase()
+            .includes(text.trim().toLowerCase());
+
+          const matchesTheme =
+            categoryId === "All" || m.shortcutId === categoryId;
+
+          return matchesText && matchesTheme;
+        })
+        .toReversed()
+    );
+  });
 
   return (
     <View style={styles.filterContainer}>
       <View style={styles.filterRow}>
-        <TextInput
-          style={styles.filterInput}
-          placeholder="Filter messages…"
-          value={filter.text}
-          onChangeText={(text) => setFilter({ ...filter, text })}
-          returnKeyType="search"
+        <Controller
+          name="text"
+          control={control}
+          render={({ field: { onChange, value } }) => (
+            <>
+              <TextInput
+                style={styles.filterInput}
+                placeholder="Filter messages…"
+                value={value}
+                onChangeText={onChange}
+                returnKeyType="search"
+              />
+
+              {value.length > 0 && (
+                <TouchableOpacity
+                  onPress={() => {
+                    resetField("text");
+                    handleFilterMessages();
+                  }}
+                >
+                  <Ionicons name="close" size={22} color={colors.DARK} />
+                </TouchableOpacity>
+              )}
+              <Ionicons
+                name="search"
+                size={20}
+                color={colors.DARK}
+                style={styles.searchIcon}
+                onPress={handleFilterMessages}
+              />
+            </>
+          )}
         />
-        <Ionicons
-          name="search"
-          size={20}
-          color={colors.DARK}
-          style={styles.searchIcon}
-        />
-        {filter.text.length > 0 && (
-          <TouchableOpacity onPress={() => setFilter({ ...filter, text: "" })}>
-            <Ionicons name="trash-outline" size={22} color="#fff" />
-          </TouchableOpacity>
-        )}
       </View>
       <View style={styles.filterZone}>
         <View style={styles.switchContainer}>
           <Text>Category</Text>
-          <Picker
-            selectedValue={filter.id}
-            onValueChange={(v) => setFilter({ ...filter, id: v })}
-            mode="dropdown"
-            style={styles.picker}
-          >
-            <Picker.Item label="All" value="All" />
-            <Picker.Item label="Default" value="Default" />
-            {shortcuts.map((shortcut) => (
-              <Picker.Item
-                key={shortcut.id}
-                label={shortcut.name}
-                value={shortcut.id}
-              />
-            ))}
-          </Picker>
+          <Controller
+            name="categoryId"
+            control={control}
+            render={({ field: { onChange, value } }) => (
+              <Picker
+                selectedValue={value}
+                onValueChange={(val) => {
+                  onChange(val);
+                  handleFilterMessages();
+                }}
+                mode="dropdown"
+                style={styles.picker}
+              >
+                <Picker.Item label="All" value="All" />
+                <Picker.Item label="Default" value="Default" />
+                {shortcuts.map((shortcut) => (
+                  <Picker.Item
+                    key={shortcut.id}
+                    label={shortcut.name}
+                    value={shortcut.id}
+                  />
+                ))}
+              </Picker>
+            )}
+          />
         </View>
         <View style={styles.switchContainer}>
-          <Switch
-            trackColor={{ false: colors.DARK, true: colors.DARK }}
-            thumbColor={colors.DARK}
-            onValueChange={setHasLink}
-            value={hasLink}
+          <Controller
+            name="hasLink"
+            control={control}
+            render={({ field: { onChange, value } }) => (
+              <>
+                <Switch
+                  trackColor={{ false: colors.DARK, true: colors.DARK }}
+                  thumbColor={colors.DARK}
+                  onValueChange={(val) => {
+                    onChange(val);
+                    handleFilterMessages();
+                  }}
+                  value={value}
+                />
+                <Text>{value ? "Has Link" : "All"}</Text>
+              </>
+            )}
           />
-          <Text>{hasLink ? "Has Link" : "All"}</Text>
         </View>
-        <Button title="By Date" onPress={() => setShowDate((prev) => !prev)} />
+        <Button
+          title="By Date"
+          onPress={() => {
+            setShowDate((prev) => !prev);
+            handleFilterMessages();
+          }}
+        />
       </View>
       {showDate && (
         <>
-          <DateTimePicker
-            mode="range"
-            style={{ backgroundColor: colors.DARK }}
-            startDate={selected?.startDate}
-            endDate={selected?.endDate}
-            maxDate={new Date()}
-            onChange={({ startDate, endDate }) => {
-              setSelected({ startDate, endDate });
-            }}
-            styles={defaultStyles}
+          <Controller
+            name="dateRange"
+            control={control}
+            render={({ field: { onChange, value } }) => (
+              <DateTimePicker
+                mode="range"
+                style={{ backgroundColor: colors.DARK }}
+                startDate={value.startDate}
+                endDate={value.endDate}
+                maxDate={new Date()}
+                onChange={onChange}
+                styles={defaultStyles}
+              />
+            )}
           />
-          <Button title="Close" onPress={() => setShowDate(false)} />
+          <Button
+            title="Close"
+            onPress={() => {
+              setShowDate(false);
+              handleFilterMessages();
+            }}
+          />
         </>
       )}
     </View>
