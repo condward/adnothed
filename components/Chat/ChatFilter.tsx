@@ -211,7 +211,6 @@ export const ChatFilter: FC<ChatFilterProps> = ({
                   }}
                   value={value}
                 />
-                <Text>{value ? "Only" : "All"}</Text>
               </>
             )}
           />
