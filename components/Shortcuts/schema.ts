@@ -1,6 +1,6 @@
 import ionicons from "@expo/vector-icons/build/vendor/react-native-vector-icons/glyphmaps/Ionicons.json";
 import { z } from "zod";
-const ioniconNames = Object.keys(ionicons);
+export const ioniconNames = Object.keys(ionicons);
 
 export const baseShortCutSchema = z.object({
   id: z.string().min(1),

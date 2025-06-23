@@ -12,6 +12,7 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 import { editShortcutSchema } from "./schema";
 import { useShortcuts } from "./ShortCutsProvider";
 import { colors } from "../colors";
+import { AutocompleteIcon } from "./AutocompleteIcon";
 
 // musical-notes
 
@@ -53,6 +54,29 @@ const styles = StyleSheet.create({
   },
   actionBtn: {
     padding: 4,
+  },
+  suggestion: {
+    padding: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+  },
+  autoCompleteContainer: {
+    position: "relative",
+  },
+  autComplete: {
+    position: "absolute",
+    top: 30,
+    left: 0,
+    right: 0,
+    backgroundColor: colors.LIGHT,
+    borderWidth: 1,
+    borderColor: colors.DARK,
+    zIndex: 1000,
+  },
+  autoCompleteOption: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
 });
 
@@ -109,7 +133,7 @@ export const EditShortCut = () => {
             control={editControl}
             render={({ field: { value: edit, onChange: setEdit } }) => (
               <View style={styles.shortCutRow}>
-                {edit.type === EditType.KEY ? (
+                {edit.type === EditType.KEY && edit.values.id === item.id ? (
                   <Controller
                     name={`edit.values.key`}
                     control={editControl}
@@ -142,7 +166,7 @@ export const EditShortCut = () => {
                   </Text>
                 )}
 
-                {edit.type === EditType.ICON ? (
+                {edit.type === EditType.ICON && edit.values.id === item.id ? (
                   <Controller
                     name={`edit.values.icon`}
                     control={editControl}
@@ -150,17 +174,11 @@ export const EditShortCut = () => {
                       field: { value, onChange },
                       fieldState: { error },
                     }) => (
-                      <TextInput
-                        placeholder="Icon"
-                        value={value}
-                        onChangeText={onChange}
-                        onSubmitEditing={handleEditSend}
-                        returnKeyType="send"
-                        style={[
-                          styles.textInput,
-                          { flexGrow: 1 },
-                          error && styles.inputError,
-                        ]}
+                      <AutocompleteIcon
+                        value={value ?? ""}
+                        onChange={onChange}
+                        onSubmit={handleEditSend}
+                        error={!!error}
                       />
                     )}
                   />
@@ -174,7 +192,7 @@ export const EditShortCut = () => {
                   />
                 )}
 
-                {edit.type === EditType.NAME ? (
+                {edit.type === EditType.NAME && edit.values.id === item.id ? (
                   <Controller
                     name={`edit.values.name`}
                     control={editControl}

@@ -12,6 +12,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useShortcuts } from "./ShortCutsProvider";
 import { ShortCutErrors } from "./ShortCutErrors";
 import { colors } from "../colors";
+import { AutocompleteIcon } from "./AutocompleteIcon";
 
 const styles = StyleSheet.create({
   inputRow: {
@@ -32,6 +33,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: colors.DARK,
     backgroundColor: colors.LIGHT,
+    borderColor: colors.DARK,
+    borderWidth: 1,
   },
   sendIcon: { fontSize: 18, fontWeight: "bold", color: colors.DARK },
   inputError: {
@@ -125,12 +128,12 @@ export const AddShortCut = () => {
           name={`newShortcut.icon`}
           control={control}
           render={({ field: { value, onChange }, fieldState: { error } }) => (
-            <TextInput
-              style={[styles.textInput, error && styles.inputError]}
-              placeholder="Icon"
+            <AutocompleteIcon
               value={value}
-              onChangeText={onChange}
-              returnKeyType="send"
+              onChange={onChange}
+              onSubmit={handleSend}
+              error={!!error}
+              renderUp
             />
           )}
         />
