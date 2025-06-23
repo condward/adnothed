@@ -11,6 +11,7 @@ import { MessageSchema } from "./schema";
 import { colors } from "../colors";
 import { DEFAULT } from "../contants";
 import { useShortcuts } from "../Shortcuts/ShortCutsProvider";
+import Ionicons from "react-native-vector-icons/Ionicons";
 
 const styles = StyleSheet.create({
   inputRow: {
@@ -84,14 +85,14 @@ export const ChatInput: FC<ChatInputProps> = ({ setMessages }) => {
     <View style={styles.inputRow}>
       <TextInput
         style={styles.textInput}
-        placeholder="Send a message"
+        placeholder="Write a note..."
         value={input}
         onChangeText={setInput}
         onSubmitEditing={handleSend}
         returnKeyType="send"
       />
       <TouchableOpacity style={styles.sendBtn} onPress={handleSend}>
-        <Text style={styles.sendIcon}>➤</Text>
+        <Ionicons name="send-outline" size={22} color={colors.DARK} />
       </TouchableOpacity>
     </View>
   );

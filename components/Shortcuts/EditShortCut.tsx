@@ -232,7 +232,7 @@ export const EditShortCut = () => {
               onPress={() => handleEditSend()}
               style={styles.actionBtn}
             >
-              <Ionicons name="send-outline" size={22} color="black" />
+              <Ionicons name="send-outline" size={22} color={colors.LIGHT} />
             </TouchableOpacity>
           </View>
         </View>

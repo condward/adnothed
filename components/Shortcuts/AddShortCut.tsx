@@ -13,6 +13,7 @@ import { useShortcuts } from "./ShortCutsProvider";
 import { ShortCutErrors } from "./ShortCutErrors";
 import { colors } from "../colors";
 import { AutocompleteIcon } from "./AutocompleteIcon";
+import Ionicons from "react-native-vector-icons/Ionicons";
 
 const styles = StyleSheet.create({
   inputRow: {
@@ -139,7 +140,7 @@ export const AddShortCut = () => {
         />
         <View style={styles.inputLayer}>
           <TouchableOpacity onPress={handleSend}>
-            <Text style={styles.sendIcon}>➤</Text>
+             <Ionicons name="send-outline" size={22} color={colors.DARK} />
           </TouchableOpacity>
         </View>
       </View>

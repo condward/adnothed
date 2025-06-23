@@ -55,6 +55,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     paddingVertical: 6,
+    color: colors.DARK,
   },
   clearText: { fontSize: 18, paddingHorizontal: 8, opacity: 0.6 },
   picker: {
@@ -138,7 +139,7 @@ export const ChatFilter: FC<ChatFilterProps> = ({
             <>
               <TextInput
                 style={styles.filterInput}
-                placeholder="Filter messages…"
+                placeholder="Filter notes…"
                 value={value}
                 onChangeText={onChange}
                 returnKeyType="search"

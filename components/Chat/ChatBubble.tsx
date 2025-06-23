@@ -35,6 +35,7 @@ const styles = StyleSheet.create({
   },
   bubble: {
     flexDirection: "row",
+    alignItems: "center",
     backgroundColor: colors.DARK,
     color: colors.LIGHT,
     borderRadius: 8,
@@ -52,7 +53,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    justifyContent: "space-between",}
+    justifyContent: "space-between",
+  },
 });
 
 enum EditType {
@@ -148,114 +150,121 @@ export const ChatBubbles: FC<ChatBubbleProps> = ({
             key={item.id}
           >
             <View style={styles.row}>
-            <View style={styles.bubble}>
-              <Controller
-                name={`edit`}
-                control={control}
-                render={({ field: { value: edit, onChange: setEdit } }) => (
-                  <>
-                    {edit.type === EditType.SHORTCUT_ID &&
-                    edit.values.id === item.id ? (
-                      <Controller
-                        name={`edit.values.shortcutId`}
-                        control={control}
-                        render={({ field: { value, onChange } }) => (
-                          <Picker
-                            selectedValue={value}
-                            onValueChange={(val) => {
-                              onChange(val);
-                              setEdit({
-                                type: EditType.SHORTCUT_ID,
-                                values: {
-                                  ...item,
-                                  shortcutId: val,
-                                },
-                              });
-                              handleEditSend();
-                            }}
-                            mode="dropdown"
-                          >
-                            <Picker.Item label={DEFAULT} value={DEFAULT} />
-                            {shortcuts.map((shortcut) => (
-                              <Picker.Item
-                                key={shortcut.id}
-                                label={shortcut.name}
-                                value={shortcut.id}
-                              />
-                            ))}
-                          </Picker>
-                        )}
-                      />
-                    ) : (
-                      <Ionicons
-                        name={
-                          shortcuts.find((s) => s.id === item.shortcutId)
-                            ?.icon ?? "document-outline"
-                        }
-                        size={20}
-                        color={colors.LIGHT}
-                        style={styles.themeIcon}
-                        onPress={() =>
-                          setEdit({ type: EditType.SHORTCUT_ID, values: item })
-                        }
-                      />
-                    )}
-                    {edit.type === EditType.TEXT &&
-                    edit.values.id === item.id ? (
-                      <Controller
-                        name="edit.values.text"
-                        control={control}
-                        render={({ field: { value, onChange } }) => (
-                          <TextInput
-                            placeholder="Key"
-                            value={value}
-                            onChangeText={onChange}
-                            onSubmitEditing={() => {
-                              setEdit({
-                                type: EditType.TEXT,
-                                values: {
-                                  ...item,
-                                  text: value,
-                                },
-                              });
-                              handleEditSend();
-                            }}
-                            returnKeyType="send"
-                            style={styles.textInput}
+              <View style={styles.bubble}>
+                <Controller
+                  name={`edit`}
+                  control={control}
+                  render={({ field: { value: edit, onChange: setEdit } }) => (
+                    <>
+                      {edit.type === EditType.SHORTCUT_ID &&
+                      edit.values.id === item.id ? (
+                        <Controller
+                          name={`edit.values.shortcutId`}
+                          control={control}
+                          render={({ field: { value, onChange } }) => (
+                            <Picker
+                              selectedValue={value}
+                              onValueChange={(val) => {
+                                onChange(val);
+                                setEdit({
+                                  type: EditType.SHORTCUT_ID,
+                                  values: {
+                                    ...item,
+                                    shortcutId: val,
+                                  },
+                                });
+                                handleEditSend();
+                              }}
+                              mode="dropdown"
+                            >
+                              <Picker.Item label={DEFAULT} value={DEFAULT} />
+                              {shortcuts.map((shortcut) => (
+                                <Picker.Item
+                                  key={shortcut.id}
+                                  label={shortcut.name}
+                                  value={shortcut.id}
+                                />
+                              ))}
+                            </Picker>
+                          )}
+                        />
+                      ) : (
+                        <Ionicons
+                          name={
+                            shortcuts.find((s) => s.id === item.shortcutId)
+                              ?.icon ?? "document-outline"
+                          }
+                          size={20}
+                          color={colors.LIGHT}
+                          style={styles.themeIcon}
+                          onPress={() =>
+                            setEdit({
+                              type: EditType.SHORTCUT_ID,
+                              values: item,
+                            })
+                          }
+                        />
+                      )}
+                      {edit.type === EditType.TEXT &&
+                      edit.values.id === item.id ? (
+                        <Controller
+                          name="edit.values.text"
+                          control={control}
+                          render={({ field: { value, onChange } }) => (
+                            <TextInput
+                              placeholder="Key"
+                              value={value}
+                              onChangeText={onChange}
+                              onSubmitEditing={() => {
+                                setEdit({
+                                  type: EditType.TEXT,
+                                  values: {
+                                    ...item,
+                                    text: value,
+                                  },
+                                });
+                                handleEditSend();
+                              }}
+                              returnKeyType="send"
+                              style={styles.textInput}
+                            />
+                          )}
+                        />
+                      ) : (
+                        <Text
+                          style={styles.msgText}
+                          onPress={() =>
+                            setEdit({ type: EditType.TEXT, values: item })
+                          }
+                        >
+                          {item.text}
+                        </Text>
+                      )}
+                      {edit.type !== null && edit.values.id === item.id && (
+                        <TouchableOpacity onPress={handleEditSend}>
+                          <Ionicons
+                            name="send-outline"
+                            size={18}
+                            color={colors.LIGHT}
                           />
-                        )}
-                      />
-                    ) : (
-                      <Text
-                        style={styles.msgText}
-                        onPress={() =>
-                          setEdit({ type: EditType.TEXT, values: item })
-                        }
-                      >
-                        {item.text}
-                      </Text>
-                    )}
-                    {edit.type !== null && (
-                      <TouchableOpacity onPress={handleEditSend}>
-                        <Text style={styles.sendIcon}>➤</Text>
-                      </TouchableOpacity>
-                    )}
-                  </>
-                )}
-              />
-            </View>
-            <TouchableOpacity>
-              <Ionicons
-                onPress={async () => {
-                  await Clipboard.setString(item.text);
-                  Alert.alert("Copied to clipboard!", item.text);
-                }}
-                name="copy-outline"
-                size={20}
-                color={colors.DARK}
-                style={styles.themeIcon}
-              />
-            </TouchableOpacity>
+                        </TouchableOpacity>
+                      )}
+                    </>
+                  )}
+                />
+              </View>
+              <TouchableOpacity>
+                <Ionicons
+                  onPress={async () => {
+                    await Clipboard.setString(item.text);
+                    Alert.alert("Copied to clipboard!", item.text);
+                  }}
+                  name="copy-outline"
+                  size={20}
+                  color={colors.DARK}
+                  style={styles.themeIcon}
+                />
+              </TouchableOpacity>
             </View>
             <Text style={styles.timestamp}>{item.time}</Text>
           </View>
