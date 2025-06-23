@@ -119,7 +119,15 @@ export const ChatBubbles: FC<ChatBubbleProps> = ({
           onLongPress={() => handleLongPress(item.id)}
           onPress={() => selectedIds.length && handleLongPress(item.id)}
         >
-          <View style={styles.msgWrapper} key={item.id}>
+          <View
+            style={[
+              styles.msgWrapper,
+              selectedIds.includes(item.id)
+                ? { borderColor: colors.DARK, borderWidth: 2, padding: 2 }
+                : undefined,
+            ]}
+            key={item.id}
+          >
             <View style={styles.bubble}>
               <Controller
                 name={`edit`}
