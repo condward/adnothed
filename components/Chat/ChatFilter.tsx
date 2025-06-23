@@ -10,7 +10,6 @@ import {
   Text,
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
-import { BaseShortCutSchema } from "../Shortcuts/schema";
 import { colors } from "../colors";
 import DateTimePicker, { useDefaultStyles } from "react-native-ui-datepicker";
 import { z } from "zod";
@@ -110,23 +109,21 @@ export const ChatFilter: FC<ChatFilterProps> = ({
   const handleFilterMessages = handleSubmit(
     ({ text, categoryId, dateRange: { startDate, endDate }, hasLink }) => {
       setFilteredMessages(
-        messages
-          .filter((m) => {
-            const intStartDate = startDate
-              ? format(startDate, "yyyy-MM-dd")
-              : undefined;
-            const intEndDate = endDate
-              ? format(endDate, "yyyy-MM-dd")
-              : undefined;
+        messages.filter((m) => {
+          const intStartDate = startDate
+            ? format(startDate, "yyyy-MM-dd")
+            : undefined;
+          const intEndDate = endDate
+            ? format(endDate, "yyyy-MM-dd")
+            : undefined;
 
-            if (intStartDate && m.time < intStartDate) return false;
-            if (intEndDate && m.time > intEndDate) return false;
-            if (hasLink && !m.text.match(urlRegex)) return false;
-            if (categoryId !== ALL && m.shortcutId !== categoryId) return false;
+          if (intStartDate && m.time < intStartDate) return false;
+          if (intEndDate && m.time > intEndDate) return false;
+          if (hasLink && !m.text.match(urlRegex)) return false;
+          if (categoryId !== ALL && m.shortcutId !== categoryId) return false;
 
-            return m.text.toLowerCase().includes(text.trim().toLowerCase());
-          })
-          .toReversed()
+          return m.text.toLowerCase().includes(text.trim().toLowerCase());
+        })
       );
     }
   );

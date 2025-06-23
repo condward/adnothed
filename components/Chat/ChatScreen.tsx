@@ -18,12 +18,14 @@ const styles = StyleSheet.create({
 });
 
 const ChatScreenWrapper = () => {
-  const { addMessages, deleteMessages, messages } = useMessageStorage();
+  const { addMessages, deleteMessages, messages, lastUpdated } =
+    useMessageStorage();
 
   if (messages.length === 0) return null;
 
   return (
     <ChatScreen
+      key={lastUpdated}
       messages={messages}
       addMessages={addMessages}
       deleteMessages={deleteMessages}
@@ -70,7 +72,7 @@ const ChatScreen: FC<ChatScreenProps> = ({
         setFilteredMessages={setFilteredMessages}
       />
       <ChatBubbles
-        filteredMessages={filteredMessages}
+        filteredMessages={filteredMessages.toReversed()}
         selectedIds={selectedIds}
         handleLongPress={handleLongPress}
         handleEdit={addMessages}

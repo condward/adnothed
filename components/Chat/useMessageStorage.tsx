@@ -4,10 +4,12 @@ import { messageSchema, MessageSchema } from "./schema";
 
 export const useMessageStorage = () => {
   const [messages, setMessages] = useState<MessageSchema[]>([]);
+  const [lastUpdated, setLastUpdated] = useState<string | null>(null);
 
   const deleteMessages = useCallback(async (ids: string[]) => {
     setMessages((prev) => prev.filter((m) => !ids.includes(m.id)));
     await AsyncStorage.multiRemove(ids.map((id) => `message:${id}`));
+    setLastUpdated(new Date().toISOString());
   }, []);
 
   const addMessages = useCallback(async (message: MessageSchema) => {
@@ -16,6 +18,7 @@ export const useMessageStorage = () => {
       `message:${message.id}`,
       JSON.stringify(message)
     );
+    setLastUpdated(new Date().toISOString());
   }, []);
 
   useEffect(() => {
@@ -39,7 +42,8 @@ export const useMessageStorage = () => {
       deleteMessages,
       addMessages,
       messages,
+      lastUpdated,
     }),
-    [addMessages, deleteMessages, messages]
+    [addMessages, deleteMessages, messages, lastUpdated]
   );
 };
