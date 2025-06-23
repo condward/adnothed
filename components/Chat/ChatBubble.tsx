@@ -166,13 +166,6 @@ export const ChatBubbles: FC<ChatBubbleProps> = ({
                               selectedValue={value}
                               onValueChange={(val) => {
                                 onChange(val);
-                                setEdit({
-                                  type: EditType.SHORTCUT_ID,
-                                  values: {
-                                    ...item,
-                                    shortcutId: val,
-                                  },
-                                });
                                 handleEditSend();
                               }}
                               mode="dropdown"
@@ -216,13 +209,6 @@ export const ChatBubbles: FC<ChatBubbleProps> = ({
                               value={value}
                               onChangeText={onChange}
                               onSubmitEditing={() => {
-                                setEdit({
-                                  type: EditType.TEXT,
-                                  values: {
-                                    ...item,
-                                    text: value,
-                                  },
-                                });
                                 handleEditSend();
                               }}
                               returnKeyType="send"

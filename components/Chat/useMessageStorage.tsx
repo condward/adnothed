@@ -12,14 +12,18 @@ export const useMessageStorage = () => {
     setLastUpdated(new Date().toISOString());
   }, []);
 
-  const addMessages = useCallback(async (message: MessageSchema) => {
-    setMessages((prev) => [...prev, message]);
-    await AsyncStorage.setItem(
-      `message:${message.id}`,
-      JSON.stringify(message)
-    );
-    setLastUpdated(new Date().toISOString());
-  }, []);
+  const addMessages = useCallback(
+    async (message: MessageSchema) => {
+      await deleteMessages([message.id]);
+      await AsyncStorage.setItem(
+        `message:${message.id}`,
+        JSON.stringify(message)
+      );
+      setMessages((prev) => [...prev, message]);
+      setLastUpdated(new Date().toISOString());
+    },
+    [deleteMessages]
+  );
 
   useEffect(() => {
     async function fetchData() {
