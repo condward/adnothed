@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, useState } from "react";
 import {
   FlatList,
   Pressable,
@@ -72,6 +72,8 @@ type ChatBubbleProps = {
   filteredMessages: MessageSchema[];
 };
 
+const PAGE_SIZE = 5;
+
 export const ChatBubbles: FC<ChatBubbleProps> = ({
   selectedIds,
   handleLongPress,
@@ -79,6 +81,9 @@ export const ChatBubbles: FC<ChatBubbleProps> = ({
   filteredMessages,
 }) => {
   const { shortcuts } = useShortcuts();
+  const [page, setPage] = useState(1);
+  const paginatedMessages = filteredMessages.slice(0, page * PAGE_SIZE);
+
   const { handleSubmit, control, reset } = useForm({
     resolver: zodResolver(bubbleSchema),
     defaultValues: {
@@ -97,7 +102,6 @@ export const ChatBubbles: FC<ChatBubbleProps> = ({
   const handleEditSend = () => {
     handleSubmit(
       ({ edit: { type, values } }) => {
-        console.log({ type, values });
         if (type === null || !values.shortcutId) return;
 
         const value = values[type];
@@ -112,8 +116,16 @@ export const ChatBubbles: FC<ChatBubbleProps> = ({
 
   return (
     <FlatList
-      data={filteredMessages}
+      data={paginatedMessages}
       keyExtractor={(item) => item.id}
+      onEndReached={(val) => {
+        const nextPage =
+          page >= Math.ceil(filteredMessages.length / PAGE_SIZE)
+            ? page
+            : page + 1;
+        setPage(nextPage);
+      }}
+      onEndReachedThreshold={0.1}
       renderItem={({ item }) => (
         <Pressable
           onLongPress={() => handleLongPress(item.id)}
