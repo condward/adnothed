@@ -1,5 +1,6 @@
 import { FC, useState } from "react";
 import {
+  Alert,
   FlatList,
   Pressable,
   StyleSheet,
@@ -17,6 +18,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Picker } from "@react-native-picker/picker";
 import { DEFAULT } from "../contants";
 import { useShortcuts } from "../Shortcuts/ShortCutsProvider";
+import Clipboard from "@react-native-clipboard/clipboard";
 
 const styles = StyleSheet.create({
   listContent: { padding: 16 },
@@ -46,6 +48,11 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   sendIcon: { fontSize: 18, fontWeight: "bold", color: colors.LIGHT },
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    justifyContent: "space-between",}
 });
 
 enum EditType {
@@ -140,6 +147,7 @@ export const ChatBubbles: FC<ChatBubbleProps> = ({
             ]}
             key={item.id}
           >
+            <View style={styles.row}>
             <View style={styles.bubble}>
               <Controller
                 name={`edit`}
@@ -235,6 +243,19 @@ export const ChatBubbles: FC<ChatBubbleProps> = ({
                   </>
                 )}
               />
+            </View>
+            <TouchableOpacity>
+              <Ionicons
+                onPress={async () => {
+                  await Clipboard.setString(item.text);
+                  Alert.alert("Copied to clipboard!", item.text);
+                }}
+                name="copy-outline"
+                size={20}
+                color={colors.DARK}
+                style={styles.themeIcon}
+              />
+            </TouchableOpacity>
             </View>
             <Text style={styles.timestamp}>{item.time}</Text>
           </View>
