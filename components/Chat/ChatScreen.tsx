@@ -1,14 +1,12 @@
-import React, { useState } from "react";
+import React, { FC, useState } from "react";
 import {
-  FlatList,
   KeyboardAvoidingView,
   LayoutAnimation,
   Platform,
   StyleSheet,
 } from "react-native";
-import { useShortcuts } from "../Shortcuts/ShortCutsProvider";
 import { ChatBar } from "./ChatBar";
-import { ChatBubble } from "./ChatBubble";
+import { ChatBubbles } from "./ChatBubble";
 import { ChatFilter } from "./ChatFilter";
 import { ChatInput } from "./ChatInput";
 import { MessageSchema } from "./schema";
@@ -17,12 +15,33 @@ import { colors } from "../colors";
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.MEDIUM, height: "100%" },
-  listContent: { padding: 16 },
 });
 
-const ChatScreen = () => {
-  const { shortcuts } = useShortcuts();
+const ChatScreenWrapper = () => {
   const { addMessages, deleteMessages, messages } = useMessageStorage();
+
+  if (messages.length === 0) return null;
+
+  return (
+    <ChatScreen
+      messages={messages}
+      addMessages={addMessages}
+      deleteMessages={deleteMessages}
+    />
+  );
+};
+
+type ChatScreenProps = {
+  messages: MessageSchema[];
+  addMessages: (message: MessageSchema) => Promise<void>;
+  deleteMessages: (ids: string[]) => void;
+};
+
+const ChatScreen: FC<ChatScreenProps> = ({
+  addMessages,
+  deleteMessages,
+  messages,
+}) => {
   const [filteredMessages, setFilteredMessages] =
     useState<MessageSchema[]>(messages);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -39,15 +58,6 @@ const ChatScreen = () => {
     setSelectedIds([]);
   };
 
-  const renderItem = ({ item }: { item: MessageSchema }) => (
-    <ChatBubble
-      item={item}
-      selectedIds={selectedIds}
-      handleLongPress={handleLongPress}
-      shortcuts={shortcuts}
-    />
-  );
-
   return (
     <KeyboardAvoidingView
       style={styles.container}
@@ -58,18 +68,16 @@ const ChatScreen = () => {
       <ChatFilter
         messages={messages}
         setFilteredMessages={setFilteredMessages}
-        shortcuts={shortcuts}
       />
-      <FlatList
-        data={filteredMessages}
-        keyExtractor={(item) => item.id}
-        renderItem={renderItem}
-        inverted
-        contentContainerStyle={styles.listContent}
+      <ChatBubbles
+        filteredMessages={filteredMessages}
+        selectedIds={selectedIds}
+        handleLongPress={handleLongPress}
+        handleEdit={addMessages}
       />
-      <ChatInput setMessages={addMessages} shortcuts={shortcuts} />
+      <ChatInput setMessages={addMessages} />
     </KeyboardAvoidingView>
   );
 };
 
-export default ChatScreen;
+export default ChatScreenWrapper;

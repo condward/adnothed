@@ -7,10 +7,10 @@ import {
   View,
 } from "react-native";
 import uuid from "react-native-uuid";
-import { BaseShortCutSchema } from "../Shortcuts/schema";
 import { MessageSchema } from "./schema";
 import { colors } from "../colors";
 import { DEFAULT } from "../contants";
+import { useShortcuts } from "../Shortcuts/ShortCutsProvider";
 
 const styles = StyleSheet.create({
   inputRow: {
@@ -44,10 +44,10 @@ const formatDateTime = (d: Date) => {
 
 type ChatInputProps = {
   setMessages: (messages: MessageSchema) => void;
-  shortcuts: BaseShortCutSchema[];
 };
 
-export const ChatInput: FC<ChatInputProps> = ({ setMessages, shortcuts }) => {
+export const ChatInput: FC<ChatInputProps> = ({ setMessages }) => {
+  const { shortcuts } = useShortcuts();
   const [input, setInput] = useState("");
 
   const handleSend = async () => {

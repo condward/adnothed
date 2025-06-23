@@ -19,6 +19,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { MessageSchema } from "./schema";
 import { format } from "date-fns";
 import { ALL, DEFAULT } from "../contants";
+import { useShortcuts } from "../Shortcuts/ShortCutsProvider";
 
 const styles = StyleSheet.create({
   filterContainer: {
@@ -80,7 +81,6 @@ export type FilterSchema = z.infer<typeof filterSchema>;
 
 type ChatFilterProps = {
   setFilteredMessages: (messages: MessageSchema[]) => void;
-  shortcuts: BaseShortCutSchema[];
   messages: MessageSchema[];
 };
 
@@ -88,9 +88,9 @@ const urlRegex = /https?:\/\/[^\s]+/g;
 
 export const ChatFilter: FC<ChatFilterProps> = ({
   setFilteredMessages,
-  shortcuts,
   messages,
 }) => {
+  const { shortcuts } = useShortcuts();
   const [showDate, setShowDate] = useState(false);
   const defaultStyles = useDefaultStyles();
 
