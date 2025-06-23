@@ -7,9 +7,7 @@ import { colors } from "../colors";
 
 const styles = StyleSheet.create({
   msgWrapper: {
-    marginBottom: 20,
     alignSelf: "flex-start",
-    flexGrow: 1,
   },
   bubble: {
     flexDirection: "row",

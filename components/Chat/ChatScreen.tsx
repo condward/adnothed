@@ -26,7 +26,7 @@ const ChatScreen = () => {
 
   const [filter, setFilter] = useState<ChatFilterState>({
     text: "",
-    id: "all",
+    id: "All",
   });
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
@@ -39,7 +39,7 @@ const ChatScreen = () => {
             .includes(filter.text.trim().toLowerCase());
 
           const matchesTheme =
-            filter.id === "all" || m.shortcutId === filter.id;
+            filter.id === "All" || m.shortcutId === filter.id;
 
           return matchesText && matchesTheme;
         })
