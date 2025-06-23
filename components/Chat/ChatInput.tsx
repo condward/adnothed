@@ -10,6 +10,7 @@ import uuid from "react-native-uuid";
 import { BaseShortCutSchema } from "../Shortcuts/schema";
 import { MessageSchema } from "./schema";
 import { colors } from "../colors";
+import { DEFAULT } from "../contants";
 
 const styles = StyleSheet.create({
   inputRow: {
@@ -30,7 +31,7 @@ const styles = StyleSheet.create({
     color: colors.DARK,
   },
   sendBtn: { paddingHorizontal: 10, paddingVertical: 8 },
-  sendIcon: { fontSize: 18, fontWeight: "bold", color: "#007AFF" },
+  sendIcon: { fontSize: 18, fontWeight: "bold", color: colors.DARK },
 });
 
 const formatDateTime = (d: Date) => {
@@ -64,7 +65,7 @@ export const ChatInput: FC<ChatInputProps> = ({ setMessages, shortcuts }) => {
       if (currentShortCut) {
         return { shortcutId: currentShortCut.id, text: text.slice(2) };
       }
-      return { shortcutId: "Default", text };
+      return { shortcutId: DEFAULT, text };
     };
     const { text, shortcutId } = transformText(prevText);
 

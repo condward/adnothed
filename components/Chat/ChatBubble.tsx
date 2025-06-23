@@ -8,6 +8,7 @@ import { colors } from "../colors";
 const styles = StyleSheet.create({
   msgWrapper: {
     alignSelf: "flex-start",
+    marginVertical: 6,
   },
   bubble: {
     flexDirection: "row",
@@ -15,10 +16,9 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingVertical: 8,
     paddingHorizontal: 12,
-    maxWidth: "80%",
   },
-  msgText: { fontSize: 16, color: "white" },
-  timestamp: { marginTop: 4, fontSize: 12, color: "white" },
+  msgText: { fontSize: 16, color: colors.LIGHT },
+  timestamp: { marginTop: 4, fontSize: 12, color: colors.DARK  },
   themeIcon: {
     marginRight: 8,
   },
@@ -49,7 +49,7 @@ export const ChatBubble: FC<ChatBubbleProps> = ({
           <Ionicons
             name={shortcut?.icon ?? "document-outline"}
             size={20}
-            color="white"
+            color={colors.LIGHT}
             style={styles.themeIcon}
           />
 

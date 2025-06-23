@@ -12,14 +12,13 @@ import {
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { BaseShortCutSchema } from "../Shortcuts/schema";
 import { colors } from "../colors";
-import DateTimePicker, {
-  DateType,
-  useDefaultStyles,
-} from "react-native-ui-datepicker";
-import z from "zod";
+import DateTimePicker, { useDefaultStyles } from "react-native-ui-datepicker";
+import { z } from "zod";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { MessageSchema } from "./schema";
+import { format } from "date-fns";
+import { ALL, DEFAULT } from "../contants";
 
 const styles = StyleSheet.create({
   filterContainer: {
@@ -85,6 +84,8 @@ type ChatFilterProps = {
   messages: MessageSchema[];
 };
 
+const urlRegex = /https?:\/\/[^\s]+/g;
+
 export const ChatFilter: FC<ChatFilterProps> = ({
   setFilteredMessages,
   shortcuts,
@@ -97,7 +98,7 @@ export const ChatFilter: FC<ChatFilterProps> = ({
     resolver: zodResolver(filterSchema),
     defaultValues: {
       text: "",
-      categoryId: "All",
+      categoryId: ALL,
       hasLink: false,
       dateRange: {
         startDate: undefined,
@@ -106,22 +107,29 @@ export const ChatFilter: FC<ChatFilterProps> = ({
     },
   });
 
-  const handleFilterMessages = handleSubmit(({ text, categoryId }) => {
-    setFilteredMessages(
-      messages
-        .filter((m) => {
-          const matchesText = m.text
-            .toLowerCase()
-            .includes(text.trim().toLowerCase());
+  const handleFilterMessages = handleSubmit(
+    ({ text, categoryId, dateRange: { startDate, endDate }, hasLink }) => {
+      setFilteredMessages(
+        messages
+          .filter((m) => {
+            const intStartDate = startDate
+              ? format(startDate, "yyyy-MM-dd")
+              : undefined;
+            const intEndDate = endDate
+              ? format(endDate, "yyyy-MM-dd")
+              : undefined;
 
-          const matchesTheme =
-            categoryId === "All" || m.shortcutId === categoryId;
+            if (intStartDate && m.time < intStartDate) return false;
+            if (intEndDate && m.time > intEndDate) return false;
+            if (hasLink && !m.text.match(urlRegex)) return false;
+            if (categoryId !== ALL && m.shortcutId !== categoryId) return false;
 
-          return matchesText && matchesTheme;
-        })
-        .toReversed()
-    );
-  });
+            return m.text.toLowerCase().includes(text.trim().toLowerCase());
+          })
+          .toReversed()
+      );
+    }
+  );
 
   return (
     <View style={styles.filterContainer}>
@@ -162,7 +170,7 @@ export const ChatFilter: FC<ChatFilterProps> = ({
       </View>
       <View style={styles.filterZone}>
         <View style={styles.switchContainer}>
-          <Text>Category</Text>
+          <Text>Group</Text>
           <Controller
             name="categoryId"
             control={control}
@@ -176,8 +184,8 @@ export const ChatFilter: FC<ChatFilterProps> = ({
                 mode="dropdown"
                 style={styles.picker}
               >
-                <Picker.Item label="All" value="All" />
-                <Picker.Item label="Default" value="Default" />
+                <Picker.Item label={ALL} value={ALL} />
+                <Picker.Item label={DEFAULT} value={DEFAULT} />
                 {shortcuts.map((shortcut) => (
                   <Picker.Item
                     key={shortcut.id}
@@ -195,6 +203,7 @@ export const ChatFilter: FC<ChatFilterProps> = ({
             control={control}
             render={({ field: { onChange, value } }) => (
               <>
+                <Text>Links</Text>
                 <Switch
                   trackColor={{ false: colors.DARK, true: colors.DARK }}
                   thumbColor={colors.DARK}
@@ -204,13 +213,14 @@ export const ChatFilter: FC<ChatFilterProps> = ({
                   }}
                   value={value}
                 />
-                <Text>{value ? "Has Link" : "All"}</Text>
+                <Text>{value ? "Only" : "All"}</Text>
               </>
             )}
           />
         </View>
         <Button
           title="By Date"
+          color={colors.DARK}
           onPress={() => {
             setShowDate((prev) => !prev);
             handleFilterMessages();
@@ -236,6 +246,7 @@ export const ChatFilter: FC<ChatFilterProps> = ({
           />
           <Button
             title="Close"
+            color={colors.DARK}
             onPress={() => {
               setShowDate(false);
               handleFilterMessages();

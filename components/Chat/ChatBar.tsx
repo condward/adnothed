@@ -1,6 +1,7 @@
 import { FC } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
+import { colors } from "../colors";
 
 const styles = StyleSheet.create({
   actionBar: {
@@ -9,10 +10,10 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 12,
     paddingVertical: 8,
-    backgroundColor: "#2196f3",
+    backgroundColor: colors.DARK,
   },
   actionCount: {
-    color: "#fff",
+    color: colors.LIGHT,
     fontSize: 16,
     fontWeight: "600",
   },
@@ -33,7 +34,7 @@ export const ChatBar: FC<ChatBarProps> = ({ selectedIds, handleDelete }) => {
       <Text style={styles.actionCount}>{selectedIds.length}</Text>
 
       <TouchableOpacity onPress={handleDelete} style={styles.actionBtn}>
-        <Ionicons name="trash-outline" size={22} color="#fff" />
+        <Ionicons name="trash-outline" size={22} color={colors.LIGHT} />
       </TouchableOpacity>
     </View>
   );
